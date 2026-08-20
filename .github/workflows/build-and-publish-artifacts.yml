@@ -57,8 +57,8 @@ jobs:
     strategy:
       matrix:
         service:
-          - name: spring-jpa
-            image: robertp22/spring-jpa
+          - name: springjpa
+            image: robertp22/springjpa
             
     steps:
       - name: Checkout code
