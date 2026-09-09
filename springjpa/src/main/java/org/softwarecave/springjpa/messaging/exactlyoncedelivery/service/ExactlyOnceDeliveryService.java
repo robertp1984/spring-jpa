@@ -8,6 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -15,17 +17,17 @@ public class ExactlyOnceDeliveryService {
 
     private final ExactlyOnceDeliveryEntryRepository exactlyOnceDeliveryEntryRepository;
 
-    public boolean isDuplicate(String messageId, String type) {
+    public boolean isDuplicate(UUID messageId, String type) {
         var existingEntry = exactlyOnceDeliveryEntryRepository.findByMessageIdAndType(messageId, type);
         return existingEntry.isPresent();
     }
 
-    private void register(String messageId, String type) {
+    private void register(UUID messageId, String type) {
         exactlyOnceDeliveryEntryRepository.save(new ExactlyOnceDeliveryEntry(messageId, type));
     }
 
     @Transactional(value = "transactionManager")
-    public void registerWithCheck(String messageId, String type) {
+    public void registerWithCheck(UUID messageId, String type) {
         try {
             register(messageId, type);
         } catch (DataIntegrityViolationException e) {

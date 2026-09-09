@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="003" author="Robert">
+
+        <createTable tableName="client">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true"  nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="client_first_name_idx" tableName="client">
+            <column name="first_name"/>
+        </createIndex>
+        <createIndex indexName="client_last_name_idx" tableName="client">
+            <column name="last_name"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="client_first_name_idx" tableName="client"/>
+            <dropIndex indexName="client_last_name_idx" tableName="client"/>
+            <dropTable tableName="client"/>
+        </rollback>
+    </changeSet>
+
+
+</databaseChangeLog>
+

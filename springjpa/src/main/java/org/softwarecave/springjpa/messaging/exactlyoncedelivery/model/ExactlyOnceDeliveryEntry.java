@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "exactly_once_delivery_entry")
 @Getter
@@ -22,17 +24,17 @@ public class ExactlyOnceDeliveryEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @Column(name = "message_id")
     @NotBlank
-    private String messageId;
+    private UUID messageId;
 
     @Column(name = "type")
     @NotBlank
     private String type;
 
-    public ExactlyOnceDeliveryEntry(String messageId, String type) {
+    public ExactlyOnceDeliveryEntry(UUID messageId, String type) {
         this.messageId = messageId;
         this.type = type;
     }

@@ -1,5 +1,6 @@
 package org.softwarecave.springjpa.asset.web;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.model.AssetClass;
@@ -31,9 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AssetControllerTest {
 
     private static final String EXTERNAL = "ext";
-    public static final UUID UUID_1 = UUID.randomUUID();
-    public static final UUID UUID_2 = UUID.randomUUID();
-    public static final UUID UUID_3 = UUID.randomUUID();
+    public static final UUID UUID_1 = UuidCreator.getTimeOrderedEpoch();
+    public static final UUID UUID_2 = UuidCreator.getTimeOrderedEpoch();
+    public static final UUID UUID_3 = UuidCreator.getTimeOrderedEpoch();
 
     @MockitoBean
     private AssetService assetService;

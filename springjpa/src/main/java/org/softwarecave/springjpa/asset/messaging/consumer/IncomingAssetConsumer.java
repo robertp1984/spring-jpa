@@ -8,6 +8,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static org.softwarecave.springjpa.messaging.KafkaConsumerConfig.ASSET_CONTAINER_FACTORY;
 import static org.softwarecave.springjpa.common.messaging.KafkaProperties.MESSAGE_ID;
 
@@ -21,7 +23,7 @@ public class IncomingAssetConsumer {
     @KafkaListener(topics = "${app.asset.incoming.topic-name}",
             containerFactory = ASSET_CONTAINER_FACTORY)
     public void consumeAsset(@Payload AssetEvent event,
-                             @Header(MESSAGE_ID) String messageId) {
+                             @Header(MESSAGE_ID) UUID messageId) {
         log.debug("Received incoming asset with messageId={} {}", messageId, event);
 
         assetProcessor.handleIncomingAsset(event, messageId);

@@ -15,6 +15,7 @@
     <properties>
         <java.version>26</java.version>
         <confluent.version>8.2.0</confluent.version>
+        <uuid-creator.version>6.1.1</uuid-creator.version>
     </properties>
 
     <repositories>
@@ -39,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-flyway</artifactId>
+            <artifactId>spring-boot-starter-liquibase</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -127,7 +128,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-flyway-test</artifactId>
+            <artifactId>spring-boot-starter-liquibase-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -160,7 +161,11 @@
             <artifactId>kafka-avro-serializer</artifactId>
             <version>${confluent.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>uuid-creator</artifactId>
+            <version>${uuid-creator.version}</version>
+        </dependency>
 
     </dependencies>
 

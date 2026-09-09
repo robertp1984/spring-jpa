@@ -1,5 +1,6 @@
 package org.softwarecave.springjpa.asset.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,6 @@ import org.softwarecave.springjpa.reference.service.AssetReferenceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +32,7 @@ public class AssetService {
     @Transactional(value = "transactionManager")
     public Asset addAsset(Asset asset) {
         validateNewAsset(asset);
+        asset.setId(UuidCreator.getTimeOrderedEpoch());
         var savedAsset = assetRepository.save(asset);
         assetKafkaPublisher.sendAdded(savedAsset);
         return savedAsset;
@@ -40,6 +41,7 @@ public class AssetService {
     @Transactional(value = "transactionManager")
     public Asset addAssetWithReferences(Asset asset) {
         validateNewAsset(asset);
+        asset.setId(UuidCreator.getTimeOrderedEpoch());
         var savedAsset = assetRepository.save(asset);
 
         List<AssetReference> savedAssetReferences = assetReferenceService.saveAll(asset.getReferences());

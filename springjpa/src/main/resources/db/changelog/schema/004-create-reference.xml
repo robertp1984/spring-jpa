@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="004" author="Robert">
+
+        <createTable tableName="reference">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value_string" type="VARCHAR(1024)"/>
+            <column name="dtype" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="asset_id" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="reference"
+                baseColumnNames="asset_id"
+                referencedTableName="asset"
+                referencedColumnNames="id"
+                constraintName="reference_asset_id_fk"/>
+
+        <sql>
+            ALTER TABLE reference
+                ADD CONSTRAINT reference_value_present CHECK (value_string IS NOT NULL);
+        </sql>
+
+        <createIndex indexName="reference_name_idx" tableName="reference">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="reference_dtype_idx" tableName="reference">
+            <column name="dtype"/>
+        </createIndex>
+        <createIndex indexName="reference_asset_id_idx" tableName="reference">
+            <column name="asset_id"/>
+        </createIndex>
+        <createIndex indexName="reference_lk_idx" tableName="reference" unique="true">
+            <column name="asset_id"/>
+            <column name="name"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="reference_lk_idx" tableName="reference"/>
+            <dropIndex indexName="reference_asset_id_idx" tableName="reference"/>
+            <dropIndex indexName="reference_dtype_idx" tableName="reference"/>
+            <dropIndex indexName="reference_name_idx" tableName="reference"/>
+            <dropTable tableName="reference"/>
+        </rollback>
+    </changeSet>
+
+
+</databaseChangeLog>
+
