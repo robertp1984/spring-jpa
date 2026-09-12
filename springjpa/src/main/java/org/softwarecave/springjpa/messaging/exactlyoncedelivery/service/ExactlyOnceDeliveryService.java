@@ -2,6 +2,7 @@ package org.softwarecave.springjpa.messaging.exactlyoncedelivery.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.messaging.consumer.NonRetryableException;
 import org.softwarecave.springjpa.messaging.exactlyoncedelivery.model.ExactlyOnceDeliveryEntry;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,7 +24,8 @@ public class ExactlyOnceDeliveryService {
     }
 
     private void register(UUID messageId, String type) {
-        exactlyOnceDeliveryEntryRepository.save(new ExactlyOnceDeliveryEntry(messageId, type));
+        ExactlyOnceDeliveryEntry entity = new ExactlyOnceDeliveryEntry(UUIDGenerator.get(), messageId, type);
+        exactlyOnceDeliveryEntryRepository.save(entity);
     }
 
     @Transactional(value = "transactionManager")
