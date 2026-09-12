@@ -2,6 +2,7 @@ package org.softwarecave.springjpa.reference.service;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.reference.model.AssetReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class AssetReferenceService {
     public List<AssetReference> saveAll(List<AssetReference> references) {
         validateReferences(references);
 
+        references.forEach(r -> r.setId(UUIDGenerator.get()));
         return assetReferenceRepository.saveAll(references);
     }
 

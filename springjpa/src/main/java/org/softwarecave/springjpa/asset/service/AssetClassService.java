@@ -1,6 +1,7 @@
 package org.softwarecave.springjpa.asset.service;
 
 import org.softwarecave.springjpa.asset.model.AssetClass;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.service.DataValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class AssetClassService {
     @Transactional(value = "transactionManager")
     public AssetClass add(AssetClass assetClass) {
         if (assetClass.getId() == null) {
+            assetClass.setId(UUIDGenerator.get());
             return assetClassRepository.save(assetClass);
         } else {
             throw new DataValidationException("New asset class id must be null");

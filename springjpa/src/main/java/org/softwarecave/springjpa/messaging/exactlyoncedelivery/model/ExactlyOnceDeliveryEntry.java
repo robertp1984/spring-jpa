@@ -7,10 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "exactly_once_delivery_entry")
@@ -22,17 +25,17 @@ public class ExactlyOnceDeliveryEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @Column(name = "message_id")
-    @NotBlank
-    private String messageId;
+    @NotNull
+    private UUID messageId;
 
     @Column(name = "type")
     @NotBlank
     private String type;
 
-    public ExactlyOnceDeliveryEntry(String messageId, String type) {
+    public ExactlyOnceDeliveryEntry(UUID messageId, String type) {
         this.messageId = messageId;
         this.type = type;
     }

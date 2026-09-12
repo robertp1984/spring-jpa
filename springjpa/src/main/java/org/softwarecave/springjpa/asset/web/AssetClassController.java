@@ -1,7 +1,5 @@
 package org.softwarecave.springjpa.asset.web;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.asset.service.AssetClassService;
@@ -24,11 +22,6 @@ public class AssetClassController {
     private final AssetClassDTOConverter assetClassDTOConverter;
 
     @PostMapping
-    @Operation(summary = "Adds new asset class", description = "Adds new asset class based on the request body",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Body of  the asset class with null id", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Successfully added new asset")
-            })
     public ResponseEntity<String> addAssetClass(@RequestBody @Valid AssetClassDTO assetClassDTO) {
         var assetClass = assetClassDTOConverter.toEntity(assetClassDTO);
 

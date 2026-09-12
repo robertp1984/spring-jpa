@@ -6,12 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.asset.messaging.AssetKafkaPublisher;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.model.AssetShortRef;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.reference.model.AssetReference;
 import org.softwarecave.springjpa.reference.service.AssetReferenceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +32,7 @@ public class AssetService {
     @Transactional(value = "transactionManager")
     public Asset addAsset(Asset asset) {
         validateNewAsset(asset);
+        asset.setId(UUIDGenerator.get());
         var savedAsset = assetRepository.save(asset);
         assetKafkaPublisher.sendAdded(savedAsset);
         return savedAsset;
@@ -40,6 +41,7 @@ public class AssetService {
     @Transactional(value = "transactionManager")
     public Asset addAssetWithReferences(Asset asset) {
         validateNewAsset(asset);
+        asset.setId(UUIDGenerator.get());
         var savedAsset = assetRepository.save(asset);
 
         List<AssetReference> savedAssetReferences = assetReferenceService.saveAll(asset.getReferences());

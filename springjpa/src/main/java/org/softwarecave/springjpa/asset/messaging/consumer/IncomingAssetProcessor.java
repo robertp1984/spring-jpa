@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -29,7 +30,7 @@ public class IncomingAssetProcessor {
     private final ExactlyOnceDeliveryService exactlyOnceDeliveryService;
 
     @Transactional(value = "transactionManager")
-    public void handleIncomingAsset(AssetEvent event, String messageId) {
+    public void handleIncomingAsset(AssetEvent event, UUID messageId) {
         validate(event);
 
         // preliminary check for duplicates
@@ -52,14 +53,14 @@ public class IncomingAssetProcessor {
         log.debug("Saved new asset {} into database", asset);
     }
 
-    private Asset saveAsset(AssetEvent event, String messageId) {
+    private Asset saveAsset(AssetEvent event, UUID messageId) {
         Asset asset = assetAvroConverter.toAsset(event.getAsset());
         asset.setId(null);
 
         AssetClass assetClass = getAssetClass(asset);
         asset.setAssetClass(assetClass);
 
-        asset.getReferences().add(new AssetReference(null, "incomingAssetId", messageId, asset));
+        asset.getReferences().add(new AssetReference(null, "incomingAssetId", messageId.toString(), asset));
 
         log.debug("Saving new asset {} into database", asset);
         assetService.addAssetWithReferences(asset);

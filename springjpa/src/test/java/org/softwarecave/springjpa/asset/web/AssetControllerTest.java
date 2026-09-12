@@ -8,6 +8,7 @@ import org.softwarecave.springjpa.asset.web.dto.AssetClassDTOConverter;
 import org.softwarecave.springjpa.asset.web.dto.AssetDTO;
 import org.softwarecave.springjpa.asset.web.dto.AssetDTOConverter;
 import org.softwarecave.springjpa.asset.web.dto.AssetReferenceDTOConverter;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.security.Role;
 import org.softwarecave.springjpa.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AssetControllerTest {
 
     private static final String EXTERNAL = "ext";
-    public static final UUID UUID_1 = UUID.randomUUID();
-    public static final UUID UUID_2 = UUID.randomUUID();
-    public static final UUID UUID_3 = UUID.randomUUID();
+    public static final UUID UUID_1 = UUIDGenerator.get();
+    public static final UUID UUID_2 = UUIDGenerator.get();
+    public static final UUID UUID_3 = UUIDGenerator.get();
 
     @MockitoBean
     private AssetService assetService;
