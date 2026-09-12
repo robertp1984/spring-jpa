@@ -1,11 +1,11 @@
 package org.softwarecave.springjpa.asset.messaging.consumer;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.softwarecave.common.avro.Asset;
 import org.softwarecave.common.avro.AssetAction;
 import org.softwarecave.common.avro.AssetEvent;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,7 +49,7 @@ public class IncomingAssetProducer {
         String desc = descriptionFormat.formatted(number);
         var assetEvent = AssetEvent.newBuilder()
                 .setAsset(Asset.newBuilder()
-                        .setId(UuidCreator.getTimeOrderedEpoch())
+                        .setId(UUIDGenerator.get())
                         .setName(name)
                         .setDescription(desc)
                         .build())
@@ -57,7 +57,7 @@ public class IncomingAssetProducer {
                 .build();
 
         var producerRecord = new ProducerRecord<>(topicName, assetEvent.getAsset().getId().toString(), assetEvent);
-        producerRecord.headers().add(MESSAGE_ID, UuidCreator.getTimeOrderedEpoch().toString().getBytes(StandardCharsets.UTF_8));
+        producerRecord.headers().add(MESSAGE_ID, UUIDGenerator.get().toString().getBytes(StandardCharsets.UTF_8));
 
         kafkaTemplate.send(producerRecord);
         log.debug("Sent incoming asset {} to topic {}", assetEvent, topicName);

@@ -1,12 +1,12 @@
 package org.softwarecave.springjpa.asset.service;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.asset.messaging.AssetKafkaPublisher;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.model.AssetShortRef;
+import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.reference.model.AssetReference;
 import org.softwarecave.springjpa.reference.service.AssetReferenceService;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ public class AssetService {
     @Transactional(value = "transactionManager")
     public Asset addAsset(Asset asset) {
         validateNewAsset(asset);
-        asset.setId(UuidCreator.getTimeOrderedEpoch());
+        asset.setId(UUIDGenerator.get());
         var savedAsset = assetRepository.save(asset);
         assetKafkaPublisher.sendAdded(savedAsset);
         return savedAsset;
@@ -41,7 +41,7 @@ public class AssetService {
     @Transactional(value = "transactionManager")
     public Asset addAssetWithReferences(Asset asset) {
         validateNewAsset(asset);
-        asset.setId(UuidCreator.getTimeOrderedEpoch());
+        asset.setId(UUIDGenerator.get());
         var savedAsset = assetRepository.save(asset);
 
         List<AssetReference> savedAssetReferences = assetReferenceService.saveAll(asset.getReferences());

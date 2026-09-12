@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: springjpa
@@ -44,7 +47,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://localhost:9000
+          issuer-uri: https://authserver:9000
 
 management:
   endpoints:

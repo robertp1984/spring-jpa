@@ -23,9 +23,11 @@ public class IncomingAssetConsumer {
     @KafkaListener(topics = "${app.asset.incoming.topic-name}",
             containerFactory = ASSET_CONTAINER_FACTORY)
     public void consumeAsset(@Payload AssetEvent event,
-                             @Header(MESSAGE_ID) UUID messageId) {
-        log.debug("Received incoming asset with messageId={} {}", messageId, event);
+                             @Header(MESSAGE_ID) String messageIdString) {
+        log.debug("Received incoming asset with messageId={} {}", messageIdString, event);
 
+        // The listener cannot convert bytes to UUID, so we need to convert it here
+        UUID messageId = UUID.fromString(messageIdString);
         assetProcessor.handleIncomingAsset(event, messageId);
     }
 
