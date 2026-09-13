@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @DiscriminatorValue("assetref")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class AssetReference extends Reference {
 

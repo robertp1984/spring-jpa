@@ -7,8 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +21,6 @@ import java.util.UUID;
 @DiscriminatorValue("ref")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public abstract class Reference {
 
@@ -36,4 +35,14 @@ public abstract class Reference {
     @Column(name = "valueString")
     @NotBlank
     private String valueString;
+
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    public Reference(UUID id, String name, String valueString) {
+        this.id = id;
+        this.name = name;
+        this.valueString = valueString;
+    }
 }

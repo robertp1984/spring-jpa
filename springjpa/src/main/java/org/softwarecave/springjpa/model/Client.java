@@ -2,11 +2,9 @@ package org.softwarecave.springjpa.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,12 +15,10 @@ import java.util.UUID;
 @Table(name = "client")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class Client {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "firstName")
@@ -31,5 +27,13 @@ public class Client {
     @Column(name = "lastName")
     private String lastName;
 
+    @Version
+    @Column(name = "version")
+    private Long version;
 
+    public Client(UUID id, String firstName, String lastName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 }

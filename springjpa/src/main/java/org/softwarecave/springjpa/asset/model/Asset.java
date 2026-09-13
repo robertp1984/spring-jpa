@@ -7,8 +7,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +22,6 @@ import java.util.UUID;
 @Table(name = "asset")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class Asset {
     @Id
@@ -43,4 +42,15 @@ public class Asset {
     @OneToMany(mappedBy = "asset")
     private List<AssetReference> references = new ArrayList<>();
 
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    public Asset(UUID id, String name, String description, AssetClass assetClass, List<AssetReference> references) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.assetClass = assetClass;
+        this.references = references;
+    }
 }
