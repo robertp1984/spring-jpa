@@ -4,10 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.model.AssetClass;
 import org.softwarecave.springjpa.asset.service.AssetService;
-import org.softwarecave.springjpa.asset.web.dto.AssetClassDTOConverter;
-import org.softwarecave.springjpa.asset.web.dto.AssetDTO;
-import org.softwarecave.springjpa.asset.web.dto.AssetDTOConverter;
-import org.softwarecave.springjpa.asset.web.dto.AssetReferenceDTOConverter;
 import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.security.Role;
 import org.softwarecave.springjpa.utils.AuthUtils;
@@ -21,7 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,9 +37,6 @@ class AssetControllerTest {
     @MockitoBean
     private AssetService assetService;
 
-    @MockitoBean
-    private AssetDTOConverter assetDTOConverter;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -53,7 +48,6 @@ class AssetControllerTest {
 
         when(assetService.findFiltered(anyString(), isNull(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(assets.getFirst())));
-        when(assetDTOConverter.convertToDto(any())).thenReturn(convertEntityToDTO(assets.getFirst()));
 
         // when
         mockMvc.perform(get("/api/v1/assets")
@@ -67,11 +61,6 @@ class AssetControllerTest {
         verify(assetService).findFiltered(anyString(), isNull(), any(Pageable.class));
     }
 
-    private AssetDTO convertEntityToDTO(Asset asset) {
-        AssetDTOConverter converter = new AssetDTOConverter(new AssetClassDTOConverter(), new AssetReferenceDTOConverter());
-        return converter.convertToDto(asset);
-    }
-
     @Test
     void testGetAssetsByFilter_assetClassName() throws Exception {
         // given
@@ -79,7 +68,6 @@ class AssetControllerTest {
         var assets = createAssets(assetClasses);
         when(assetService.findFiltered(isNull(), anyString(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(assets.getLast())));
-        when(assetDTOConverter.convertToDto(any())).thenReturn(convertEntityToDTO(assets.getLast()));
 
         // when
         mockMvc.perform(get("/api/v1/assets")

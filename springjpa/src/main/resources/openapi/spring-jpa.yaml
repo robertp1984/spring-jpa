@@ -1,0 +1,258 @@
+openapi: 3.1.0
+
+info:
+  title: Spring JPA API
+  version: "1.0"
+  summary: OpenAPI definition for the Spring JPA service
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Assets
+    description: Operations related to assets
+
+security:
+  - oauth2: [ ]
+
+paths:
+  /assetClasses:
+    post:
+      summary: Creates an asset class
+      description: Creates an asset class with provided details
+      tags:
+        - Assets
+      operationId: createAssetClass
+      requestBody:
+        description: Asset class to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetClass"
+      responses:
+        "201":
+          description: Asset class was created
+          headers:
+            Location:
+              $ref: "#/components/headers/LocationHeader"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "409":
+          description: Conflict
+
+
+  /assets:
+    get:
+      summary: Get assets
+      description: Returns a paginated list of assets
+      tags:
+        - Assets
+      operationId: getAssets
+      parameters:
+        - $ref: "#/components/parameters/AssetNameParam"
+        - $ref: "#/components/parameters/AssetClassNameParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetListPage'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+
+    post:
+      summary: Create a new asset
+      description: Creates a new asset with the provided details
+      tags:
+        - Assets
+      operationId: createAsset
+      requestBody:
+        description: Asset to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Asset"
+      responses:
+        "201":
+          description: Asset was created
+          headers:
+            Location:
+              $ref: "#/components/headers/LocationHeader"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "409":
+          description: Conflict
+
+
+
+
+
+components:
+
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://authserver:9000/oauth/token
+          scopes:
+            asset.read: Grants read access for assets
+            asset.write: Grants write access for assets
+
+  parameters:
+
+    PageParam:
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      example: 2
+
+    SizeParam:
+      in: query
+      name: size
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 50
+
+    SortParam:
+      in: query
+      name: sort
+      required: false
+      schema:
+        type: string
+        pattern: "^[a-zA-Z0-9]+,(asc|desc)$"
+      example: name,asc
+
+    AssetNameParam:
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      example: Netflix
+
+    AssetClassNameParam:
+      in: query
+      name: assetClassName
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      example: External
+
+  schemas:
+
+    AssetClass:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+      required:
+        - id
+        - name
+        - description
+
+    AssetReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          minLength: 1
+          example: Netflix
+        valueString:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+      required:
+        - id
+        - name
+        - valueString
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          minLength: 1
+          example: Netflix
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        assetClass:
+          $ref: "#/components/schemas/AssetClass"
+        references:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetReference"
+      required:
+        - id
+        - name
+        - description
+        - assetClass
+
+    AssetList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Asset"
+
+    AssetListPage:
+      type: object
+      properties:
+        content:
+          $ref: "#/components/schemas/AssetList"
+
+  headers:
+    LocationHeader:
+      description: Location header for created resources
+      required: true
+      schema:
+        type: string
+        format: uri
