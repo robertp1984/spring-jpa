@@ -4,7 +4,7 @@ import org.mapstruct.factory.Mappers;
 import org.softwarecave.springjpa.asset.service.AssetClassService;
 import org.softwarecave.springjpa.asset.web.mapper.AssetClassMapper;
 import org.softwarecave.springjpa.openapi.api.AssetClassesApi;
-import org.softwarecave.springjpa.openapi.model.AssetClass;
+import org.softwarecave.springjpa.openapi.model.CreateAssetClassRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +23,7 @@ public class AssetClassController implements AssetClassesApi {
     }
 
     @Override
-    public ResponseEntity<Void> createAssetClass(AssetClass assetClassApi) {
+    public ResponseEntity<Void> createAssetClass(CreateAssetClassRequest assetClassApi) {
         var assetClass = mapper.toModel(assetClassApi);
 
         var savedAssetClass = assetClassService.add(assetClass);

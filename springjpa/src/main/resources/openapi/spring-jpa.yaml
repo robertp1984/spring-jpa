@@ -13,7 +13,7 @@ tags:
     description: Operations related to assets
 
 security:
-  - oauth2: [ ]
+  - OAuth2: [ ]
 
 paths:
   /assetClasses:
@@ -29,7 +29,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AssetClass"
+              $ref: "#/components/schemas/CreateAssetClassRequest"
       responses:
         "201":
           description: Asset class was created
@@ -44,6 +44,9 @@ paths:
           description: Forbidden
         "409":
           description: Conflict
+      security:
+        - OAuth2:
+            - asset.write
 
 
   /assets:
@@ -65,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssetListPage'
+                $ref: '#/components/schemas/AssetPage'
         "400":
           description: Bad request
         "401":
@@ -74,6 +77,9 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+      security:
+        - OAuth2:
+            - asset.read
 
     post:
       summary: Create a new asset
@@ -87,7 +93,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Asset"
+              $ref: "#/components/schemas/CreateAssetRequest"
       responses:
         "201":
           description: Asset was created
@@ -102,7 +108,9 @@ paths:
           description: Forbidden
         "409":
           description: Conflict
-
+      security:
+        - OAuth2:
+            - asset.write
 
 
 
@@ -147,9 +155,15 @@ components:
       name: sort
       required: false
       schema:
-        type: string
-        pattern: "^[a-zA-Z0-9]+,(asc|desc)$"
-      example: name,asc
+        type: array
+        items:
+          type: string
+          pattern: "^[a-zA-Z0-9]+,(asc|desc)$"
+      style: form
+      explode: true
+      example:
+        - name,asc
+        - description,desc
 
     AssetNameParam:
       in: query
@@ -171,6 +185,40 @@ components:
 
   schemas:
 
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+      required:
+        - number
+        - size
+        - totalElements
+        - totalPages
+        - numberOfElements
+        - first
+        - last
+        - empty
+
     AssetClass:
       type: object
       properties:
@@ -188,6 +236,21 @@ components:
           example: Netflix shares D
       required:
         - id
+        - name
+        - description
+
+    CreateAssetClassRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+      required:
         - name
         - description
 
@@ -238,16 +301,39 @@ components:
         - description
         - assetClass
 
+    CreateAssetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: Netflix
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        assetClassId:
+          type: string
+          format: uuid
+      required:
+        - name
+        - description
+        - assetClassId
+
     AssetList:
       type: array
       items:
         $ref: "#/components/schemas/Asset"
 
-    AssetListPage:
-      type: object
-      properties:
-        content:
-          $ref: "#/components/schemas/AssetList"
+    AssetPage:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              $ref: "#/components/schemas/AssetList"
 
   headers:
     LocationHeader:
