@@ -4,11 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.model.AssetClass;
 import org.softwarecave.springjpa.asset.service.AssetService;
+import org.softwarecave.springjpa.asset.web.mapper.AssetClassMapperImpl;
+import org.softwarecave.springjpa.asset.web.mapper.AssetMapperImpl;
+import org.softwarecave.springjpa.asset.web.mapper.AssetPageMapperImpl;
 import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.security.Role;
 import org.softwarecave.springjpa.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AssetController.class)
+@Import({AssetMapperImpl.class, AssetClassMapperImpl.class, AssetPageMapperImpl.class})
 class AssetControllerTest {
 
     private static final String EXTERNAL = "ext";

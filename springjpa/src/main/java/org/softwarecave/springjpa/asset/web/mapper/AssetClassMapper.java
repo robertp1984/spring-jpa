@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.softwarecave.springjpa.asset.model.AssetClass;
 import org.softwarecave.springjpa.openapi.model.CreateAssetClassRequest;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface AssetClassMapper {
 
     org.softwarecave.springjpa.openapi.model.AssetClass toApiModel(AssetClass assetClass);

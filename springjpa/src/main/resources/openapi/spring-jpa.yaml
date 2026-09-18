@@ -46,7 +46,7 @@ paths:
           description: Conflict
       security:
         - OAuth2:
-            - asset.write
+            - assetclass.write
 
 
   /assets:
@@ -124,6 +124,8 @@ components:
         clientCredentials:
           tokenUrl: https://authserver:9000/oauth/token
           scopes:
+            assetclass.read: Grants read access for asset classes
+            assetclass.write: Grants write access for asset classes
             asset.read: Grants read access for assets
             asset.write: Grants write access for assets
 

@@ -1,6 +1,6 @@
 package org.softwarecave.springjpa.asset.web;
 
-import org.mapstruct.factory.Mappers;
+import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.asset.service.AssetClassService;
 import org.softwarecave.springjpa.asset.web.mapper.AssetClassMapper;
 import org.softwarecave.springjpa.openapi.api.AssetClassesApi;
@@ -12,15 +12,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class AssetClassController implements AssetClassesApi {
 
     private final AssetClassService assetClassService;
     private final AssetClassMapper mapper;
-
-    public AssetClassController(AssetClassService assetClassService) {
-        this.assetClassService = assetClassService;
-        this.mapper = Mappers.getMapper(AssetClassMapper.class);
-    }
 
     @Override
     public ResponseEntity<Void> createAssetClass(CreateAssetClassRequest assetClassApi) {
