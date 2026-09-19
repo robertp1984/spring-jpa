@@ -1,6 +1,8 @@
 package org.softwarecave.springjpa.asset.service;
 
-public class NoSuchAssetException extends RuntimeException {
+import org.softwarecave.springjpa.service.NoDataException;
+
+public class NoSuchAssetException extends NoDataException {
     public NoSuchAssetException(String message) {
         super(message);
     }

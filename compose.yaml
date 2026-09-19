@@ -186,6 +186,7 @@ services:
     ports:
       - "9000:9000"
     restart: no
+    pull_policy: always
 
 
 

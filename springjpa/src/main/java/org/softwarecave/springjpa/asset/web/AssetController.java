@@ -1,48 +1,50 @@
 package org.softwarecave.springjpa.asset.web;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.service.AssetService;
-import org.softwarecave.springjpa.asset.web.dto.AssetDTO;
-import org.softwarecave.springjpa.asset.web.dto.AssetDTOConverter;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.softwarecave.springjpa.common.SortParser;
+import org.softwarecave.springjpa.asset.web.mapper.AssetMapper;
+import org.softwarecave.springjpa.asset.web.mapper.AssetPageMapper;
+import org.softwarecave.springjpa.openapi.api.AssetsApi;
+import org.softwarecave.springjpa.openapi.model.AssetPage;
+import org.softwarecave.springjpa.openapi.model.CreateAssetRequest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
-@RequestMapping("/api/v1/assets")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class AssetController {
+public class AssetController implements AssetsApi {
 
     private final AssetService assetService;
-    private final AssetDTOConverter assetDTOConverter;
+    private final AssetMapper mapper;
+    private final AssetPageMapper assetPageMapper;
 
-    @GetMapping
-    public Page<AssetDTO> getAssets(@RequestParam(value = "name", required = false) String name,
-                                    @RequestParam(value = "assetClassName", required = false) String assetClassName,
-                                    Pageable pageable) {
-        Page<Asset> page = assetService.findFiltered(name, assetClassName, pageable);
-        return page.map(assetDTOConverter::convertToDto);
-    }
-
-    @PostMapping
-    public ResponseEntity<String> addAsset(@RequestBody @Valid AssetDTO assetDTO) {
-        var asset = assetDTOConverter.convertToEntity(assetDTO);
+    @Override
+    public ResponseEntity<Void> createAsset(CreateAssetRequest assetApi) {
+        var asset = mapper.toModel(assetApi);
 
         var savedAsset = assetService.addAsset(asset);
 
-        var uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{id}").buildAndExpand(savedAsset.getId()).toUri();
-        return ResponseEntity.created(uri).body("");
+        var uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
+                .buildAndExpand(savedAsset.getId()).toUri();
+        return ResponseEntity.created(uri).build();
+    }
+
+    @Override
+    public ResponseEntity<AssetPage> getAssets(String name, String assetClassName, Integer page, Integer size, List<String> sort) {
+        var sortSpec = SortParser.parse(sort, Set.of("id", "name", "description"));
+        var pageable = PageRequest.of(page, size, sortSpec);
+
+        var assetPage = assetService.findFiltered(name, assetClassName, pageable);
+
+        var assetPageApi = assetPageMapper.toAssetPageApi(assetPage);
+        return ResponseEntity.ok(assetPageApi);
     }
 }

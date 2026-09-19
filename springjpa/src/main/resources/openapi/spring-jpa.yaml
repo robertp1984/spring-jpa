@@ -1,0 +1,358 @@
+openapi: 3.1.0
+
+info:
+  title: Spring JPA API
+  version: "1.0"
+  summary: OpenAPI definition for the Spring JPA service
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Assets
+    description: Operations related to assets
+
+security:
+  - OAuth2: [ ]
+
+paths:
+  /assetClasses:
+    post:
+      summary: Creates an asset class
+      description: Creates an asset class with provided details
+      tags:
+        - Assets
+      operationId: createAssetClass
+      requestBody:
+        description: Asset class to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssetClassRequest"
+      responses:
+        "201":
+          description: Asset class was created
+          headers:
+            Location:
+              $ref: "#/components/headers/LocationHeader"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+      security:
+        - OAuth2:
+            - assetclass.write
+
+
+  /assets:
+    get:
+      summary: Get assets
+      description: Returns a paginated list of assets
+      tags:
+        - Assets
+      operationId: getAssets
+      parameters:
+        - $ref: "#/components/parameters/AssetNameParam"
+        - $ref: "#/components/parameters/AssetClassNameParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetPage'
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+        - OAuth2:
+            - asset.read
+
+    post:
+      summary: Create a new asset
+      description: Creates a new asset with the provided details
+      tags:
+        - Assets
+      operationId: createAsset
+      requestBody:
+        description: Asset to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssetRequest"
+      responses:
+        "201":
+          description: Asset was created
+          headers:
+            Location:
+              $ref: "#/components/headers/LocationHeader"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+      security:
+        - OAuth2:
+            - asset.write
+
+
+
+
+components:
+
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://authserver:9000/oauth/token
+          scopes:
+            assetclass.read: Grants read access for asset classes
+            assetclass.write: Grants write access for asset classes
+            asset.read: Grants read access for assets
+            asset.write: Grants write access for assets
+
+  parameters:
+
+    PageParam:
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      example: 2
+
+    SizeParam:
+      in: query
+      name: size
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 50
+
+    SortParam:
+      in: query
+      name: sort
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: "^[a-zA-Z0-9]+,(asc|desc)$"
+      style: form
+      explode: true
+      example:
+        - name,asc
+        - description,desc
+
+    AssetNameParam:
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      example: Netflix
+
+    AssetClassNameParam:
+      in: query
+      name: assetClassName
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      example: External
+
+  schemas:
+
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+      required:
+        - number
+        - size
+        - totalElements
+        - totalPages
+        - numberOfElements
+        - first
+        - last
+        - empty
+
+    AssetClass:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+      required:
+        - id
+        - name
+        - description
+
+    CreateAssetClassRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+      required:
+        - name
+        - description
+
+    AssetReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          minLength: 1
+          example: Netflix
+        valueString:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+      required:
+        - id
+        - name
+        - valueString
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        name:
+          type: string
+          minLength: 1
+          example: Netflix
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        assetClass:
+          $ref: "#/components/schemas/AssetClass"
+        references:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetReference"
+      required:
+        - id
+        - name
+        - description
+        - assetClass
+
+    CreateAssetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: Netflix
+        description:
+          type: string
+          minLength: 1
+          example: Netflix shares D
+        assetClassId:
+          type: string
+          format: uuid
+      required:
+        - name
+        - description
+        - assetClassId
+
+    AssetList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Asset"
+
+    AssetPage:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              $ref: "#/components/schemas/AssetList"
+
+  headers:
+    LocationHeader:
+      description: Location header for created resources
+      required: true
+      schema:
+        type: string
+        format: uri
+
+  responses:
+    BadRequest:
+      description: Bad request
+    Unauthorized:
+      description: Unauthorized
+    Forbidden:
+      description: Forbidden
+    NotFound:
+      description: Not found
+    Conflict:
+      description: Conflict

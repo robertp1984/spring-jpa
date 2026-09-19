@@ -16,6 +16,8 @@
         <java.version>26</java.version>
         <confluent.version>8.2.0</confluent.version>
         <uuid-creator.version>6.1.1</uuid-creator.version>
+        <openapi-generator-maven-plugin.version>7.25.0</openapi-generator-maven-plugin.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
     </properties>
 
     <repositories>
@@ -166,6 +168,11 @@
             <artifactId>uuid-creator</artifactId>
             <version>${uuid-creator.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
 
     </dependencies>
 
@@ -199,6 +206,11 @@
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
                                 </path>
+                                <path>
+                                    <groupId>org.mapstruct</groupId>
+                                    <artifactId>mapstruct-processor</artifactId>
+                                    <version>${mapstruct.version}</version>
+                                </path>
                             </annotationProcessorPaths>
                         </configuration>
                     </execution>
@@ -215,6 +227,31 @@
                                     <artifactId>lombok</artifactId>
                                 </path>
                             </annotationProcessorPaths>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/spring-jpa.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>org.softwarecave.springjpa.openapi.api</apiPackage>
+                            <modelPackage>org.softwarecave.springjpa.openapi.model</modelPackage>
+                            <configOptions>
+                                <openApiNullable>false</openApiNullable>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useBeanValidation>true</useBeanValidation>
+                                <useSpringBoot4>true</useSpringBoot4>
+                                <useJackson3>true</useJackson3>
+                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>
