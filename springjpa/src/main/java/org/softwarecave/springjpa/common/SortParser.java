@@ -1,4 +1,4 @@
-package org.softwarecave.springjpa.asset.web.common;
+package org.softwarecave.springjpa.common;
 
 import org.springframework.data.domain.Sort;
 
@@ -20,7 +20,7 @@ public final class SortParser {
         String[] parts = value.split(",", 2);
         String property = parts[0].trim();
         if (!allowedProperties.contains(property)) {
-            throw new IllegalArgumentException("Sorting by '%s' is not allowed".formatted(property));
+            throw new InvalidSortSpecException("Sorting by '%s' is not allowed".formatted(property));
         }
         Sort.Direction direction = parts.length == 2 ? Sort.Direction.fromString(parts[1].trim()) : Sort.Direction.ASC;
         return new Sort.Order(direction, property);

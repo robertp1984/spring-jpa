@@ -2,7 +2,7 @@ package org.softwarecave.springjpa.asset.web;
 
 import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.asset.service.AssetService;
-import org.softwarecave.springjpa.asset.web.common.SortParser;
+import org.softwarecave.springjpa.common.SortParser;
 import org.softwarecave.springjpa.asset.web.mapper.AssetMapper;
 import org.softwarecave.springjpa.asset.web.mapper.AssetPageMapper;
 import org.softwarecave.springjpa.openapi.api.AssetsApi;

@@ -9,7 +9,6 @@ import org.softwarecave.springjpa.openapi.model.CreateAssetRequest;
 public interface AssetMapper {
 
     org.softwarecave.springjpa.openapi.model.Asset toApiModel(Asset asset);
-    Asset toModel(org.softwarecave.springjpa.openapi.model.Asset asset);
 
     @Mapping(target = "id", ignore=true)
     @Mapping(target = "references", ignore = true)

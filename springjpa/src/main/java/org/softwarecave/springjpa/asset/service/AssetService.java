@@ -115,7 +115,7 @@ public class AssetService {
             }
 
             if (!predicates.isEmpty()) {
-                return cb.or(predicates);
+                return cb.and(predicates);
             } else {
                 return cb.conjunction(); // return all
             }
