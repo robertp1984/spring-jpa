@@ -1,6 +1,8 @@
 package org.softwarecave.springjpa.common;
 
-public class InvalidSortSpecException extends RuntimeException {
+import org.softwarecave.springjpa.service.RequestValidationException;
+
+public class InvalidSortSpecException extends RequestValidationException {
     public InvalidSortSpecException(String message) {
         super(message);
     }

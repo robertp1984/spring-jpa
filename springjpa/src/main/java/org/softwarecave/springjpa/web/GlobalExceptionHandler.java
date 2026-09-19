@@ -1,9 +1,8 @@
 package org.softwarecave.springjpa.web;
 
-import org.softwarecave.springjpa.asset.service.NoSuchAssetClassException;
-import org.softwarecave.springjpa.asset.service.NoSuchAssetException;
-import org.softwarecave.springjpa.common.InvalidSortSpecException;
 import org.softwarecave.springjpa.service.DataValidationException;
+import org.softwarecave.springjpa.service.NoDataException;
+import org.softwarecave.springjpa.service.RequestValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -14,28 +13,23 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-
-    @ExceptionHandler
-    public ResponseEntity<Object> handleDataValidationException(DataValidationException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        return createResponseEntity(pd, null, HttpStatus.BAD_REQUEST, null);
+    @ExceptionHandler({DataValidationException.class})
+    public ResponseEntity<Object> handleBadRequest(DataValidationException ex) {
+        return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Object> handleNoSuchAssetException(NoSuchAssetException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        return createResponseEntity(pd, null, HttpStatus.NOT_FOUND, null);
+    @ExceptionHandler({RequestValidationException.class})
+    public ResponseEntity<Object> handleBadRequest(RequestValidationException ex) {
+        return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Object> handleNoSuchAssetClassException(NoSuchAssetClassException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        return createResponseEntity(pd, null, HttpStatus.NOT_FOUND, null);
+    @ExceptionHandler({NoDataException.class})
+    public ResponseEntity<Object> handleNotFound(NoDataException ex) {
+        return problemResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Object> handleInvalidSortSpecException(InvalidSortSpecException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        return createResponseEntity(pd, null, HttpStatus.BAD_REQUEST, null);
+    private ResponseEntity<Object> problemResponse(HttpStatus status, String message) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, message);
+        return createResponseEntity(pd, null, status, null);
     }
 }

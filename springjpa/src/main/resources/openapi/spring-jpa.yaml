@@ -37,13 +37,13 @@ paths:
             Location:
               $ref: "#/components/headers/LocationHeader"
         "400":
-          description: Bad request
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden
+          $ref: "#/components/responses/Forbidden"
         "409":
-          description: Conflict
+          $ref: "#/components/responses/Conflict"
       security:
         - OAuth2:
             - assetclass.write
@@ -70,13 +70,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssetPage'
         "400":
-          description: Bad request
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Not found
+          $ref: "#/components/responses/NotFound"
       security:
         - OAuth2:
             - asset.read
@@ -101,13 +101,13 @@ paths:
             Location:
               $ref: "#/components/headers/LocationHeader"
         "400":
-          description: Bad request
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden
+          $ref: "#/components/responses/Forbidden"
         "409":
-          description: Conflict
+          $ref: "#/components/responses/Conflict"
       security:
         - OAuth2:
             - asset.write
@@ -344,3 +344,15 @@ components:
       schema:
         type: string
         format: uri
+
+  responses:
+    BadRequest:
+      description: Bad request
+    Unauthorized:
+      description: Unauthorized
+    Forbidden:
+      description: Forbidden
+    NotFound:
+      description: Not found
+    Conflict:
+      description: Conflict
