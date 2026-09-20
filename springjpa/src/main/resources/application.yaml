@@ -4,36 +4,40 @@ server:
 spring:
   application:
     name: springjpa
+
   datasource:
-    url: jdbc:h2:mem:mydb;MODE=PostgreSQL
+    url: jdbc:h2:mem:mydb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     username: sa
     password: password
     driverClassName: org.h2.Driver
+
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+
   h2:
     console:
       enabled: true
+
   jmx:
     enabled: true
 
   kafka:
+    bootstrap-servers: localhost:29092, localhost:29192, localhost:29292
     producer:
-      bootstrap-servers: localhost:29092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
       properties:
         enable.idempotence: true
         compression.type: "snappy"
-        linger.ms: 5000
+        linger.ms: 500
         acks: "all"
         batch.size: 8192
         schema.registry.url: http://localhost:8081
-      transaction-id-prefix: spring-practice-tx-${random.uuid}
+      transaction-id-prefix: ${spring.application.name}-
     consumer:
-      bootstrap-servers: localhost:29192, localhost:29292
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: latest
@@ -70,10 +74,17 @@ app:
       topic-name: incoming.asset.avro
       name-format: "Incoming #%d"
       description-format: "Incoming asset with random number #%d"
+
   kafka:
     retry:
       delay-ms: 1000
       max-attempts: 3
+
+  outbox:
+    sender:
+      delay: 1000
+      batch-size: 100
+      ack-timeout: 30000
 
 
 logging:

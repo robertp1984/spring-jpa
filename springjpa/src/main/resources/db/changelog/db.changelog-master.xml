@@ -11,5 +11,6 @@
     <include file="db/changelog/schema/004-create-reference.xml"/>
     <include file="db/changelog/schema/005-create-exactly-once-delivery-entry.xml"/>
     <include file="db/changelog/schema/006-add-version-columns.xml"/>
+    <include file="db/changelog/schema/007-create-outbox.xml"/>
 
 </databaseChangeLog>

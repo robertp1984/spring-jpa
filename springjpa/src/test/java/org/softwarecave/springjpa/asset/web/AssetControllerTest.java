@@ -35,9 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AssetControllerTest {
 
     private static final String EXTERNAL = "ext";
-    public static final UUID UUID_1 = UUIDGenerator.get();
-    public static final UUID UUID_2 = UUIDGenerator.get();
-    public static final UUID UUID_3 = UUIDGenerator.get();
+    private static final UUID UUID_1 = UUIDGenerator.get();
+    private static final UUID UUID_2 = UUIDGenerator.get();
+    private static final UUID UUID_3 = UUIDGenerator.get();
 
     @MockitoBean
     private AssetService assetService;

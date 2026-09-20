@@ -9,8 +9,11 @@ import org.softwarecave.springjpa.openapi.model.CreateAssetClassRequest;
 public interface AssetClassMapper {
 
     org.softwarecave.springjpa.openapi.model.AssetClass toApiModel(AssetClass assetClass);
+
+    @Mapping(target = "version", ignore = true)
     AssetClass toModel(org.softwarecave.springjpa.openapi.model.AssetClass assetClass);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     AssetClass toModel(CreateAssetClassRequest assetClass);
 }
