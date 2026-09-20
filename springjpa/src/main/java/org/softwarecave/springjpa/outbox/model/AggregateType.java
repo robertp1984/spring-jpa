@@ -2,11 +2,11 @@ package org.softwarecave.springjpa.outbox.model;
 
 import lombok.Getter;
 import org.apache.avro.specific.SpecificRecord;
-import org.softwarecave.common.avro.Asset;
+import org.softwarecave.common.avro.AssetEvent;
 
 @Getter
 public enum AggregateType {
-    ASSET(Asset.class);
+    ASSET_EVENT(AssetEvent.class);
 
     private final Class<? extends SpecificRecord> avroClass;
 

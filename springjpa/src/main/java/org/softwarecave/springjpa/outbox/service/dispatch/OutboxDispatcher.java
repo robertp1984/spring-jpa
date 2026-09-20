@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -61,13 +60,13 @@ public class OutboxDispatcher {
     private void waitForKafkaAcks(ArrayList<CompletableFuture<SendResult<String, ?>>> futureList, Page<Outbox> entryList) {
         for (int i = 0; i < futureList.size(); i++) {
             var future = futureList.get(i);
+            var entry = entryList.getContent().get(i);
             try {
                 var sendResult = future.get();
-                var entry = entryList.getContent().get(i);
 
                 updateStatusAsSent(entry);
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Failed sending the message from outbox ", e);
+            } catch (Exception e) {
+                log.error("Failed sending the message with id=%s from outbox".formatted(entry.getId()), e);
             }
         }
     }
@@ -75,7 +74,6 @@ public class OutboxDispatcher {
     private void updateStatusAsSent(Outbox entry) {
         log.info("Set the status of outbox entry {} to SENT", entry.getPayloadString());
         entry.setStatus(Status.SENT);
-        outboxRepository.save(entry);
     }
 
     private ArrayList<CompletableFuture<SendResult<String, ?>>> sendToKafka(Page<Outbox> entryList) {
@@ -86,13 +84,16 @@ public class OutboxDispatcher {
         return futureList;
     }
 
-    private CompletableFuture<SendResult<String,?>> sendToKafka(Outbox entry) {
-        MessageType messageType = entry.getMessageType();
+    private CompletableFuture<SendResult<String, ?>> sendToKafka(Outbox outbox) {
+        MessageType messageType = outbox.getMessageType();
         var dispatcherStrategy = dispatcherStrategies.get(messageType);
         if (dispatcherStrategy != null) {
-            return dispatcherStrategy.send(entry);
+            return dispatcherStrategy.send(outbox);
         } else {
-            throw new InvalidOutboxDataException("Unrecognized message type " + messageType);
+            log.error("Unrecognized message type {} for outbox with id={}. Outbox entry will be skipped.", messageType, outbox.getId());
+            InvalidOutboxDataException exception = new InvalidOutboxDataException("Unrecognized message type %s for outbox with id=%s."
+                    .formatted(messageType, outbox.getId()));
+            return CompletableFuture.failedFuture(exception);
         }
     }
 

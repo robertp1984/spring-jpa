@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,20 +29,25 @@ public class Outbox {
 
     @Id
     @Column(name = "id")
+    @NotNull
     private UUID id;
 
     @Column(name = "topic")
+    @NotBlank
     private String topic;
 
     @Column(name = "message_type")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private MessageType messageType;
 
     @Column(name = "aggregate_type")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private AggregateType aggregateType;
 
     @Column(name = "aggregate_id")
+    @NotBlank
     private String aggregateId;
 
     @Column(name = "payload_bytes")
@@ -50,9 +57,11 @@ public class Outbox {
     private String payloadString;
 
     @Column(name = "created_date")
+    @NotNull
     private Instant createdDate;
 
     @Column(name = "status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
 

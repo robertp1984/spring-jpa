@@ -29,7 +29,7 @@ public class AssetKafkaPublisher {
     public void sendAdded(Asset asset) {
         AssetEvent event = assetAvroConverter.toAssetAvro(asset);
         log.info("Sending the event {} to topic {}", event, topicName);
-        avroOutboxService.send(topicName, event.getAsset().getId().toString(), event, AggregateType.ASSET);
+        avroOutboxService.send(topicName, event.getAsset().getId().toString(), event, AggregateType.ASSET_EVENT);
     }
 
 }

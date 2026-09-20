@@ -32,12 +32,12 @@ public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
         return MessageType.AVRO;
     }
 
-    private Class<? extends SpecificRecord> getAvroClass(Outbox entry) {
-        AggregateType aggregateType = entry.getAggregateType();
+    private Class<? extends SpecificRecord> getAvroClass(Outbox value) {
+        AggregateType aggregateType = value.getAggregateType();
         if (aggregateType != null) {
             return aggregateType.getAvroClass();
         } else {
-            throw new InvalidOutboxDataException("Null aggregate type for entry %s".formatted(entry.getId()));
+            throw new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(value.getId()));
         }
     }
 
@@ -47,9 +47,9 @@ public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
             var avroObject = fromBytes(value.getPayloadBytes(), avroClass);
 
             return kafkaTemplate.send(value.getTopic(), value.getAggregateId(), avroObject)
-                    .thenApply(a ->  a);
+                    .thenApply(a -> a);
         } catch (Exception e) {
-            throw new RuntimeException(e); //TODO:
+            throw new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(value.getId()), e);
         }
     }
 }
