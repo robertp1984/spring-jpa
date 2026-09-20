@@ -28,7 +28,7 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConsumerFactory<String, SpecificRecord> consumerFactory(
-            @Value("${spring.kafka.consumer.bootstrap-servers}") String bootstrapServers,
+            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
             @Value("${spring.kafka.consumer.group-id}") String groupId,
             @Value("${spring.kafka.consumer.properties.schema.registry.url}") String schemaRegistryUrl,
             @Value("${spring.kafka.consumer.properties.isolation.level}") String isolationLevel

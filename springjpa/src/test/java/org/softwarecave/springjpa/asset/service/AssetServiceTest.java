@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +21,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("it")
 @Transactional(value = "transactionManager")
 @Rollback
-public class AssetServiceTest {
+class AssetServiceTest {
 
-    public static final String EXTERNAL = "External";
-    public static final String INTERNAL = "Internal";
+    private static final String EXTERNAL = "External";
+    private static final String INTERNAL = "Internal";
 
     private static final Pageable DEFAULT_PAGEABLE = PageRequest.of(0, 100);
     private static final Pageable PAGEABLE_SORT_BY_NAME = PageRequest.of(0, 100, Sort.by("name").ascending());

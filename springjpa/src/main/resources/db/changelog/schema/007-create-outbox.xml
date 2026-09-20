@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="007" author="Robert">
+
+        <createTable tableName="outbox">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="topic" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aggregate_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aggregate_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload_bytes" type="BYTEA"/>
+            <column name="payload_string" type="TEXT"/>
+            <column name="created_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="outbox_status_idx" tableName="outbox">
+            <column name="status"/>
+        </createIndex>
+        <createIndex indexName="outbox_created_date_idx" tableName="outbox">
+            <column name="created_date"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="outbox_status_idx" tableName="outbox"/>
+            <dropIndex indexName="outbox_created_date_idx" tableName="outbox"/>
+            <dropTable tableName="outbox"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
