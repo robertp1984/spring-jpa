@@ -73,14 +73,6 @@ public class Outbox {
                   AggregateType aggregateType, String aggregateId,
                   byte[] payloadBytes, String payloadString,
                   Instant createdDate, Status status) {
-        this.id = id;
-        this.topic = topic;
-        this.messageType = messageType;
-        this.aggregateType = aggregateType;
-        this.aggregateId = aggregateId;
-        this.payloadBytes = payloadBytes;
-        this.payloadString = payloadString;
-        this.createdDate = createdDate;
-        this.status = status;
+        this(id, topic, messageType, aggregateType, aggregateId, payloadBytes, payloadString, createdDate, status, null);
     }
 }

@@ -49,7 +49,9 @@ public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
             return kafkaTemplate.send(value.getTopic(), value.getAggregateId(), avroObject)
                     .thenApply(a -> a);
         } catch (Exception e) {
-            throw new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(value.getId()), e);
+            log.error("Failed to deserialize or send message from outbox {}", value.getId(), e);
+            var exception = new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(value.getId()), e);
+            return CompletableFuture.failedFuture(exception);
         }
     }
 }

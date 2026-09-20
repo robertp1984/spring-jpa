@@ -83,6 +83,8 @@ app:
   outbox:
     sender:
       delay: 1000
+      batch-size: 100
+      ack-timeout: 30000
 
 
 logging:

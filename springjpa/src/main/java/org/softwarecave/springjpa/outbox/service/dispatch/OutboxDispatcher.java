@@ -7,6 +7,7 @@ import org.softwarecave.springjpa.outbox.model.Status;
 import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
 import org.softwarecave.springjpa.outbox.service.OutboxRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,7 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -28,10 +31,16 @@ public class OutboxDispatcher {
 
     private final OutboxRepository outboxRepository;
     private final Map<MessageType, OutboxDispatcherStrategy> dispatcherStrategies;
+    private final long ackTimeoutMillis;
+    private final int batchSize;
 
-    public OutboxDispatcher(OutboxRepository outboxRepository) {
+    public OutboxDispatcher(OutboxRepository outboxRepository,
+                            @Value("${app.outbox.sender.ack-timeout}") long ackTimeoutMillis,
+                            @Value("${app.outbox.sender.batch-size}") int batchSize) {
         this.outboxRepository = outboxRepository;
         this.dispatcherStrategies = new HashMap<>();
+        this.ackTimeoutMillis = ackTimeoutMillis;
+        this.batchSize = batchSize;
     }
 
     @Autowired(required = false)
@@ -48,8 +57,10 @@ public class OutboxDispatcher {
     @Scheduled(fixedDelayString = "${app.outbox.sender.delay}", timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(value = "transactionManager")
     public void process() {
+        // Method findByStatus must use pessimistic locking to prevent multiple instance of this application
+        // from processing the same rows at the same time which could result in sending the same message multiple times.
         var entryList = outboxRepository.findByStatus(Status.NEW,
-                PageRequest.of(0, 100, Sort.by(Sort.Order.asc("createdDate"))));
+                PageRequest.of(0, batchSize, Sort.by(Sort.Order.asc("createdDate"))));
         log.info("Fetched {} entries from outbox to process", entryList.getContent().size());
 
         var futureList = sendToKafka(entryList);
@@ -58,21 +69,37 @@ public class OutboxDispatcher {
     }
 
     private void waitForKafkaAcks(ArrayList<CompletableFuture<SendResult<String, ?>>> futureList, Page<Outbox> entryList) {
+        boolean interrupted = false;
+
+        //TODO: fix monitoring of Futures
+        CompletableFuture.allOf(futureList.toArray(CompletableFuture[]::new))
+                .orTimeout(ackTimeoutMillis, TimeUnit.MILLISECONDS)
+                .join();
         for (int i = 0; i < futureList.size(); i++) {
             var future = futureList.get(i);
             var entry = entryList.getContent().get(i);
             try {
-                var sendResult = future.get();
+                future.get(); // ignore the result
 
                 updateStatusAsSent(entry);
-            } catch (Exception e) {
-                log.error("Failed sending the message with id=%s from outbox".formatted(entry.getId()), e);
+            } catch (InterruptedException e) {
+                interrupted = true;
+                log.error("Interrupted while waiting for Kafka ack for outbox entry with id={}", entry.getId(), e);
+                // Ignore the interrupt for now and keep processing as usual because we cannot leave the inconsistent state
+            } catch (ExecutionException | CancellationException e) {
+                log.error("Failed sending the message with id={} from outbox", entry.getId(), e);
             }
+        }
+
+
+        // restore the interrupted flag if wa interrupted
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 
     private void updateStatusAsSent(Outbox entry) {
-        log.info("Set the status of outbox entry {} to SENT", entry.getPayloadString());
+        log.info("Set the status of outbox id={} to SENT", entry.getAggregateId());
         entry.setStatus(Status.SENT);
     }
 
