@@ -99,7 +99,7 @@ public class OutboxDispatcher {
     }
 
     private void updateStatusAsSent(Outbox entry) {
-        log.info("Set the status of outbox id={} to SENT", entry.getAggregateId());
+        log.info("Set the status of outbox id={} to SENT", entry.getId());
         entry.setStatus(Status.SENT);
     }
 

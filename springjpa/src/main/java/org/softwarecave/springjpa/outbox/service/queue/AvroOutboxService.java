@@ -33,7 +33,8 @@ public class AvroOutboxService {
         Outbox outbox = new Outbox(UUIDGenerator.get(), topic, MessageType.AVRO, aggregateType, key,
                 payloadBinary, null, Instant.now(), Status.NEW);
 
-        log.info("Saving to outbox: {}", outbox);
+        log.info("Saving to outbox id={} topic={} aggregateType={} key={}", outbox.getId(), outbox.getTopic(),
+                outbox.getAggregateType(), outbox.getAggregateId());
         outboxRepository.save(outbox);
     }
 }

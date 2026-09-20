@@ -32,25 +32,25 @@ public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
         return MessageType.AVRO;
     }
 
-    private Class<? extends SpecificRecord> getAvroClass(Outbox value) {
-        AggregateType aggregateType = value.getAggregateType();
+    private Class<? extends SpecificRecord> getAvroClass(Outbox outbox) {
+        AggregateType aggregateType = outbox.getAggregateType();
         if (aggregateType != null) {
             return aggregateType.getAvroClass();
         } else {
-            throw new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(value.getId()));
+            throw new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(outbox.getId()));
         }
     }
 
-    public CompletableFuture<SendResult<String, ?>> sendToKafka(Outbox value) {
+    public CompletableFuture<SendResult<String, ?>> sendToKafka(Outbox outbox) {
         try {
-            var avroClass = getAvroClass(value);
-            var avroObject = fromBytes(value.getPayloadBytes(), avroClass);
+            var avroClass = getAvroClass(outbox);
+            var avroObject = fromBytes(outbox.getPayloadBytes(), avroClass);
 
-            return kafkaTemplate.send(value.getTopic(), value.getAggregateId(), avroObject)
+            return kafkaTemplate.send(outbox.getTopic(), outbox.getAggregateId(), avroObject)
                     .thenApply(a -> a);
         } catch (Exception e) {
-            log.error("Failed to deserialize or send message from outbox {}", value.getId(), e);
-            var exception = new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(value.getId()), e);
+            log.error("Failed to deserialize or send message from outbox {}", outbox.getId(), e);
+            var exception = new InvalidOutboxDataException("Failed to deserialize or send message from outbox %s".formatted(outbox.getId()), e);
             return CompletableFuture.failedFuture(exception);
         }
     }
