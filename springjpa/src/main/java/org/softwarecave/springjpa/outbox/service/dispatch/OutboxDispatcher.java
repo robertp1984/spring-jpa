@@ -49,7 +49,7 @@ public class OutboxDispatcher {
         for (var dispatcherStrategy : dispatcherStrategies) {
             var prevValue = this.dispatcherStrategies.putIfAbsent(dispatcherStrategy.getMessageType(), dispatcherStrategy);
             if (prevValue != null) {
-                throw new InvalidOutboxDataException("There are conflicting Outbox dispatchers strategies with the same message type");
+                throw new IllegalStateException("There are conflicting Outbox dispatchers strategies with the same message type");
             }
         }
     }
@@ -61,26 +61,22 @@ public class OutboxDispatcher {
         // from processing the same rows at the same time which could result in sending the same message multiple times.
         var entryList = outboxRepository.findByStatus(Status.NEW,
                 PageRequest.of(0, batchSize, Sort.by(Sort.Order.asc("createdDate"))));
-        log.info("Fetched {} entries from outbox to process", entryList.getContent().size());
+        log.debug("Fetched {} entries from outbox to process", entryList.getContent().size());
 
         var futureList = sendToKafka(entryList);
 
         waitForKafkaAcks(futureList, entryList);
     }
 
-    private void waitForKafkaAcks(ArrayList<CompletableFuture<SendResult<String, ?>>> futureList, Page<Outbox> entryList) {
-        boolean interrupted = false;
+    private void waitForKafkaAcks(List<CompletableFuture<SendResult<String, ?>>> futureList, Page<Outbox> entryList) {
+        waitForAll(futureList);
 
-        //TODO: fix monitoring of Futures
-        CompletableFuture.allOf(futureList.toArray(CompletableFuture[]::new))
-                .orTimeout(ackTimeoutMillis, TimeUnit.MILLISECONDS)
-                .join();
+        boolean interrupted = false;
         for (int i = 0; i < futureList.size(); i++) {
             var future = futureList.get(i);
             var entry = entryList.getContent().get(i);
             try {
-                future.get(); // ignore the result
-
+                future.get(); // just check if finished
                 updateStatusAsSent(entry);
             } catch (InterruptedException e) {
                 interrupted = true;
@@ -91,11 +87,23 @@ public class OutboxDispatcher {
             }
         }
 
-
-        // restore the interrupted flag if wa interrupted
+        // restore the interrupted flag if was interrupted
         if (interrupted) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private void waitForAll(List<CompletableFuture<SendResult<String, ?>>> futureList) {
+        // Apply the timeout to each future individually and swallow its outcome (success or failure) into a
+        // settlement future, so that allOf().join() below waits for every send to settle without throwing as
+        // soon as the first one fails or times out. This lets us process each entry's own outcome afterwards
+        // instead of aborting the whole batch on the first failure.
+        var settlementFutures = futureList.stream()
+                .map(future -> future
+                        .orTimeout(ackTimeoutMillis, TimeUnit.MILLISECONDS)
+                        .handle((result, ex) -> null))
+                .toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(settlementFutures).join();
     }
 
     private void updateStatusAsSent(Outbox entry) {

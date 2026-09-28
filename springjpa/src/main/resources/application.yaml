@@ -36,7 +36,7 @@ spring:
         acks: "all"
         batch.size: 8192
         schema.registry.url: http://localhost:8081
-      transaction-id-prefix: ${spring.application.name}-
+        delivery.timeout.ms: 120000
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -84,7 +84,8 @@ app:
     sender:
       delay: 1000
       batch-size: 100
-      ack-timeout: 30000
+      # Keep ack-timeout higher than delivery.timeout.ms to ensure that the messages really timed out
+      ack-timeout: 140000
 
 
 logging:
