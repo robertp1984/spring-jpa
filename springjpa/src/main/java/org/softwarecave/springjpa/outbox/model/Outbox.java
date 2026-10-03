@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -65,6 +66,14 @@ public class Outbox {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(name = "attempt_count")
+    @Min(0)
+    private int attemptCount;
+
+    @Column(name = "next_attempt_at")
+    @NotNull
+    private Instant nextAttemptAt;
+
     @Column(name = "version")
     @Version
     private Long version;
@@ -72,7 +81,7 @@ public class Outbox {
     public Outbox(UUID id, String topic, MessageType messageType,
                   AggregateType aggregateType, String aggregateId,
                   byte[] payloadBytes, String payloadString,
-                  Instant createdDate, Status status) {
-        this(id, topic, messageType, aggregateType, aggregateId, payloadBytes, payloadString, createdDate, status, null);
+                  Instant createdDate, Status status, int attemptCount, Instant nextAttemptAt) {
+        this(id, topic, messageType, aggregateType, aggregateId, payloadBytes, payloadString, createdDate, status, attemptCount, nextAttemptAt, null);
     }
 }

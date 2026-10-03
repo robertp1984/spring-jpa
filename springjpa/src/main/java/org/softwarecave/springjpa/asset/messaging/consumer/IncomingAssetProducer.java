@@ -22,7 +22,7 @@ import static org.softwarecave.springjpa.common.messaging.KafkaProperties.MESSAG
 @Slf4j
 public class IncomingAssetProducer {
 
-    private static final int BOUND = 100000;
+    private static final int BOUND = 100000000;
 
     private final KafkaTemplate<String, AssetEvent> kafkaTemplate;
     private final String topicName;

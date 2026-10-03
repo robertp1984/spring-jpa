@@ -8,14 +8,12 @@ import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
 import org.softwarecave.springjpa.outbox.service.OutboxRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,14 +28,17 @@ import java.util.concurrent.TimeUnit;
 public class OutboxDispatcher {
 
     private final OutboxRepository outboxRepository;
+    private final OutboxDispatcherBackoff outboxDispatcherBackoff;
     private final Map<MessageType, OutboxDispatcherStrategy> dispatcherStrategies;
     private final long ackTimeoutMillis;
     private final int batchSize;
 
     public OutboxDispatcher(OutboxRepository outboxRepository,
+                            OutboxDispatcherBackoff outboxDispatcherBackoff,
                             @Value("${app.outbox.sender.ack-timeout}") long ackTimeoutMillis,
                             @Value("${app.outbox.sender.batch-size}") int batchSize) {
         this.outboxRepository = outboxRepository;
+        this.outboxDispatcherBackoff = outboxDispatcherBackoff;
         this.dispatcherStrategies = new HashMap<>();
         this.ackTimeoutMillis = ackTimeoutMillis;
         this.batchSize = batchSize;
@@ -57,24 +58,23 @@ public class OutboxDispatcher {
     @Scheduled(fixedDelayString = "${app.outbox.sender.delay}", timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(value = "transactionManager")
     public void process() {
-        // Method findByStatus must use pessimistic locking to prevent multiple instance of this application
+        // Method findByStatusAndNextAttempt must use pessimistic locking to prevent multiple instance of this application
         // from processing the same rows at the same time which could result in sending the same message multiple times.
-        var entryList = outboxRepository.findByStatus(Status.NEW,
-                PageRequest.of(0, batchSize, Sort.by(Sort.Order.asc("createdDate"))));
-        log.debug("Fetched {} entries from outbox to process", entryList.getContent().size());
+        var entryList = outboxRepository.findByStatusAndNextAttempt(Status.NEW, Instant.now(), batchSize);
+        log.debug("Fetched {} entries from outbox to process", entryList.size());
 
         var futureList = sendToKafka(entryList);
 
         waitForKafkaAcks(futureList, entryList);
     }
 
-    private void waitForKafkaAcks(List<CompletableFuture<SendResult<String, ?>>> futureList, Page<Outbox> entryList) {
+    private void waitForKafkaAcks(List<CompletableFuture<SendResult<String, ?>>> futureList, List<Outbox> entryList) {
         waitForAll(futureList);
 
         boolean interrupted = false;
         for (int i = 0; i < futureList.size(); i++) {
             var future = futureList.get(i);
-            var entry = entryList.getContent().get(i);
+            var entry = entryList.get(i);
             try {
                 future.get(); // just check if finished
                 updateStatusAsSent(entry);
@@ -84,6 +84,7 @@ public class OutboxDispatcher {
                 // Ignore the interrupt for now and keep processing as usual because we cannot leave the inconsistent state
             } catch (ExecutionException | CancellationException e) {
                 log.error("Failed sending the message with id={} from outbox", entry.getId(), e);
+                outboxDispatcherBackoff.onFailure(entry);
             }
         }
 
@@ -111,8 +112,8 @@ public class OutboxDispatcher {
         entry.setStatus(Status.SENT);
     }
 
-    private ArrayList<CompletableFuture<SendResult<String, ?>>> sendToKafka(Page<Outbox> entryList) {
-        ArrayList<CompletableFuture<SendResult<String, ?>>> futureList = new ArrayList<>();
+    private List<CompletableFuture<SendResult<String, ?>>> sendToKafka(List<Outbox> entryList) {
+        List<CompletableFuture<SendResult<String, ?>>> futureList = new ArrayList<>();
         for (var entry : entryList) {
             futureList.add(sendToKafka(entry));
         }

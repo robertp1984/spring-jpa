@@ -31,7 +31,7 @@ public class JsonOutboxService {
 
     private void save(String topic, String id, String payloadString, AggregateType aggregateType) {
         Outbox outbox = new Outbox(UUIDGenerator.get(), topic, MessageType.JSON, aggregateType, id,
-                null, payloadString, Instant.now(), Status.NEW);
+                null, payloadString, Instant.now(), Status.NEW, 0, Instant.now());
 
         log.info("Saving to outbox id={} topic={} aggregateType={} key={}", outbox.getId(), outbox.getTopic(),
                 outbox.getAggregateType(), outbox.getAggregateId());

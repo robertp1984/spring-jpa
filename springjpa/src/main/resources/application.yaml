@@ -32,7 +32,7 @@ spring:
       properties:
         enable.idempotence: true
         compression.type: "snappy"
-        linger.ms: 500
+        linger.ms: 0
         acks: "all"
         batch.size: 8192
         schema.registry.url: http://localhost:8081
@@ -86,6 +86,7 @@ app:
       batch-size: 100
       # Keep ack-timeout higher than delivery.timeout.ms to ensure that the messages really timed out
       ack-timeout: 140000
+      backoff-initial: 100
 
 
 logging:
