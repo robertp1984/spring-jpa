@@ -42,16 +42,24 @@ public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
     }
 
     public CompletableFuture<SendResult<String, ?>> sendToKafka(Outbox outbox) {
+        SpecificRecord avroObject;
         try {
             var avroClass = getAvroClass(outbox);
-            var avroObject = fromBytes(outbox.getPayloadBytes(), avroClass);
+            avroObject = fromBytes(outbox.getPayloadBytes(), avroClass);
+        } catch (Exception e) {
+            // Invalid data will never succeed, so it is reported as non-retryable
+            log.error("Failed to deserialize message from outbox {}", outbox.getId(), e);
+            var exception = new InvalidOutboxDataException("Failed to deserialize message from outbox %s".formatted(outbox.getId()), e);
+            return CompletableFuture.failedFuture(exception);
+        }
 
+        try {
             return kafkaTemplate.send(outbox.getTopic(), outbox.getAggregateId(), avroObject)
                     .thenApply(a -> a);
         } catch (Exception e) {
-            log.error("Failed to deserialize or send message from outbox {}", outbox.getId(), e);
-            var exception = new InvalidOutboxDataException("Failed to deserialize or send message from outbox %s".formatted(outbox.getId()), e);
-            return CompletableFuture.failedFuture(exception);
+            // Synchronous send failures (e.g. metadata timeout) may be transient, so they are retryable
+            log.error("Failed to send message from outbox {}", outbox.getId(), e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 }

@@ -82,9 +82,12 @@ public class OutboxDispatcher {
                 interrupted = true;
                 log.error("Interrupted while waiting for Kafka ack for outbox entry with id={}", entry.getId(), e);
                 // Ignore the interrupt for now and keep processing as usual because we cannot leave the inconsistent state
-            } catch (ExecutionException | CancellationException e) {
+            } catch (ExecutionException e) {
                 log.error("Failed sending the message with id={} from outbox", entry.getId(), e);
-                outboxDispatcherBackoff.onFailure(entry);
+                outboxDispatcherBackoff.onFailure(entry, e.getCause());
+            } catch (CancellationException e) {
+                log.error("Failed sending the message with id={} from outbox", entry.getId(), e);
+                outboxDispatcherBackoff.onFailure(entry, e);
             }
         }
 

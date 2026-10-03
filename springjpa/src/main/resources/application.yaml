@@ -86,7 +86,10 @@ app:
       batch-size: 100
       # Keep ack-timeout higher than delivery.timeout.ms to ensure that the messages really timed out
       ack-timeout: 140000
-      backoff-initial: 100
+      backoff-initial: 1000
+      backoff-max: 300000
+      backoff-multiplier: 2.0
+      max-attempts: 100
 
 
 logging:
@@ -95,15 +98,15 @@ logging:
       softwarecave: trace
       springframework:
         kafka:
-          transaction: debug
-        transaction: debug
+          transaction: info
+        transaction: info
         orm:
           jpa:
-            JpaTransactionManager: debug
+            JpaTransactionManager: info
         security: trace
       apache:
         kafka:
           clients:
             producer:
               internals:
-                TransactionManager: debug
+                TransactionManager: info

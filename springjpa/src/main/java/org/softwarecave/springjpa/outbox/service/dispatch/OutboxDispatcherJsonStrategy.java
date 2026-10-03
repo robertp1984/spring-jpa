@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.softwarecave.springjpa.outbox.model.MessageType;
 import org.softwarecave.springjpa.outbox.model.Outbox;
-import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,9 @@ public class OutboxDispatcherJsonStrategy implements OutboxDispatcherStrategy {
             return kafkaTemplate.send(outbox.getTopic(), outbox.getAggregateId(), outbox.getPayloadString())
                     .thenApply(a -> a);
         } catch (Exception e) {
+            // Synchronous send failures (e.g. metadata timeout) may be transient, so they are retryable
             log.error("Failed to send message from outbox {}", outbox.getId(), e);
-            var exception = new InvalidOutboxDataException("Failed to send message from outbox %s".formatted(outbox.getId()), e);
-            return CompletableFuture.failedFuture(exception);
+            return CompletableFuture.failedFuture(e);
         }
     }
 
