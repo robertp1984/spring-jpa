@@ -13,5 +13,6 @@ public interface AssetMapper {
     @Mapping(target = "id", ignore=true)
     @Mapping(target = "references", ignore = true)
     @Mapping(target = "assetClass", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Asset toModel(CreateAssetRequest asset);
 }

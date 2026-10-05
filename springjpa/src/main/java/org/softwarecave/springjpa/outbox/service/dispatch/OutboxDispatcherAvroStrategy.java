@@ -1,0 +1,65 @@
+package org.softwarecave.springjpa.outbox.service.dispatch;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.specific.SpecificRecord;
+import org.softwarecave.springjpa.outbox.model.AggregateType;
+import org.softwarecave.springjpa.outbox.model.MessageType;
+import org.softwarecave.springjpa.outbox.model.Outbox;
+import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
+
+import static org.softwarecave.springjpa.outbox.tools.AvroTools.fromBytes;
+
+@RequiredArgsConstructor
+@Service
+@Slf4j
+public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
+
+    private final KafkaTemplate<String, SpecificRecord> kafkaTemplate;
+
+    @Override
+    public CompletableFuture<SendResult<String, ?>> send(Outbox outbox) {
+        return sendToKafka(outbox);
+    }
+
+    @Override
+    public MessageType getMessageType() {
+        return MessageType.AVRO;
+    }
+
+    private Class<? extends SpecificRecord> getAvroClass(Outbox outbox) {
+        AggregateType aggregateType = outbox.getAggregateType();
+        if (aggregateType != null) {
+            return aggregateType.getAvroClass();
+        } else {
+            throw new InvalidOutboxDataException("Null aggregate type for outbox %s".formatted(outbox.getId()));
+        }
+    }
+
+    public CompletableFuture<SendResult<String, ?>> sendToKafka(Outbox outbox) {
+        SpecificRecord avroObject;
+        try {
+            var avroClass = getAvroClass(outbox);
+            avroObject = fromBytes(outbox.getPayloadBytes(), avroClass);
+        } catch (Exception e) {
+            // Invalid data will never succeed, so it is reported as non-retryable
+            log.error("Failed to deserialize message from outbox {}", outbox.getId(), e);
+            var exception = new InvalidOutboxDataException("Failed to deserialize message from outbox %s".formatted(outbox.getId()), e);
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        try {
+            return kafkaTemplate.send(outbox.getTopic(), outbox.getAggregateId(), avroObject)
+                    .thenApply(a -> a);
+        } catch (Exception e) {
+            // Synchronous send failures (e.g. metadata timeout) may be transient, so they are retryable
+            log.error("Failed to send message from outbox {}", outbox.getId(), e);
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+}

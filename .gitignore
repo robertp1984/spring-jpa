@@ -31,3 +31,6 @@ replay_pid*
 
 # Debug/monitoring tools output
 *.jfr
+
+# AI
+.mcp.json
