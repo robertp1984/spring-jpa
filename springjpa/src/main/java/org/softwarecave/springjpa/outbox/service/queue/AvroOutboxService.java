@@ -1,5 +1,6 @@
 package org.softwarecave.springjpa.outbox.service.queue;
 
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecord;
@@ -12,8 +13,6 @@ import org.softwarecave.springjpa.outbox.service.OutboxRepository;
 import org.softwarecave.springjpa.outbox.tools.AvroTools;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +29,25 @@ public class AvroOutboxService {
     }
 
     private void save(String topic, String key, byte[] payloadBinary, AggregateType aggregateType) {
-        Outbox outbox = new Outbox(UUIDGenerator.get(), topic, MessageType.AVRO, aggregateType, key,
-                payloadBinary, null, Instant.now(), Status.NEW, 0, Instant.now());
+        Outbox outbox = new Outbox(
+                UUIDGenerator.get(),
+                topic,
+                MessageType.AVRO,
+                aggregateType,
+                key,
+                payloadBinary,
+                null,
+                Instant.now(),
+                Status.NEW,
+                0,
+                Instant.now());
 
-        log.info("Saving to outbox id={} topic={} aggregateType={} key={}", outbox.getId(), outbox.getTopic(),
-                outbox.getAggregateType(), outbox.getAggregateId());
+        log.info(
+                "Saving to outbox id={} topic={} aggregateType={} key={}",
+                outbox.getId(),
+                outbox.getTopic(),
+                outbox.getAggregateType(),
+                outbox.getAggregateId());
         outboxRepository.save(outbox);
     }
 }

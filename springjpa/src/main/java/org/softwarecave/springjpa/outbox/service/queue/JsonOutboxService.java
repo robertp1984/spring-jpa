@@ -1,5 +1,6 @@
 package org.softwarecave.springjpa.outbox.service.queue;
 
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.softwarecave.springjpa.common.UUIDGenerator;
@@ -11,8 +12,6 @@ import org.softwarecave.springjpa.outbox.service.OutboxRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
-
-import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +29,25 @@ public class JsonOutboxService {
     }
 
     private void save(String topic, String id, String payloadString, AggregateType aggregateType) {
-        Outbox outbox = new Outbox(UUIDGenerator.get(), topic, MessageType.JSON, aggregateType, id,
-                null, payloadString, Instant.now(), Status.NEW, 0, Instant.now());
+        Outbox outbox = new Outbox(
+                UUIDGenerator.get(),
+                topic,
+                MessageType.JSON,
+                aggregateType,
+                id,
+                null,
+                payloadString,
+                Instant.now(),
+                Status.NEW,
+                0,
+                Instant.now());
 
-        log.info("Saving to outbox id={} topic={} aggregateType={} key={}", outbox.getId(), outbox.getTopic(),
-                outbox.getAggregateType(), outbox.getAggregateId());
+        log.info(
+                "Saving to outbox id={} topic={} aggregateType={} key={}",
+                outbox.getId(),
+                outbox.getTopic(),
+                outbox.getAggregateType(),
+                outbox.getAggregateId());
         outboxRepository.save(outbox);
     }
-
 }

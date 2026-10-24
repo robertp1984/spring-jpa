@@ -1,14 +1,13 @@
 package org.softwarecave.springjpa.reference.service;
 
 import io.micrometer.common.util.StringUtils;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.reference.model.AssetReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

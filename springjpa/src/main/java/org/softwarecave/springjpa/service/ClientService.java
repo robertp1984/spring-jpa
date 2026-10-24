@@ -1,13 +1,12 @@
 package org.softwarecave.springjpa.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.model.Client;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

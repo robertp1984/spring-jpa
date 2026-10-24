@@ -17,9 +17,10 @@ public class AssetKafkaPublisher {
     private final AssetAvroConverter assetAvroConverter;
     private final AvroOutboxService avroOutboxService;
 
-    public AssetKafkaPublisher(@Value("${app.asset.kafka-publisher.topic-name}") String topicName,
-                               AvroOutboxService avroOutboxService,
-                               AssetAvroConverter assetAvroConverter) {
+    public AssetKafkaPublisher(
+            @Value("${app.asset.kafka-publisher.topic-name}") String topicName,
+            AvroOutboxService avroOutboxService,
+            AssetAvroConverter assetAvroConverter) {
         this.topicName = topicName;
 
         this.avroOutboxService = avroOutboxService;
@@ -31,5 +32,4 @@ public class AssetKafkaPublisher {
         log.info("Sending the event {} to topic {}", event, topicName);
         avroOutboxService.send(topicName, event.getAsset().getId().toString(), event, AggregateType.ASSET_EVENT);
     }
-
 }

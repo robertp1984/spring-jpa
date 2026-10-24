@@ -1,9 +1,7 @@
 package org.softwarecave.springjpa.service;
 
+import java.util.UUID;
 import org.softwarecave.springjpa.model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.UUID;
-
-public interface ClientRepository extends JpaRepository<Client, UUID> {
-}
+public interface ClientRepository extends JpaRepository<Client, UUID> {}

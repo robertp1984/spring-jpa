@@ -1,5 +1,10 @@
 package org.softwarecave.springjpa.asset.messaging.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,12 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.softwarecave.common.avro.AssetAction;
 import org.softwarecave.common.avro.AssetEvent;
 import org.springframework.kafka.core.KafkaTemplate;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class IncomingAssetProducerTest {
@@ -27,7 +26,8 @@ class IncomingAssetProducerTest {
         // given
         var producer = new IncomingAssetProducer(kafkaTemplate, "topic", "Name %s", "Desc %s");
 
-        ArgumentCaptor<ProducerRecord<String, AssetEvent>> argumentCaptor = ArgumentCaptor.forClass(ProducerRecord.class);
+        ArgumentCaptor<ProducerRecord<String, AssetEvent>> argumentCaptor =
+                ArgumentCaptor.forClass(ProducerRecord.class);
         when(kafkaTemplate.send(argumentCaptor.capture())).thenReturn(CompletableFuture.completedFuture(null));
 
         // when

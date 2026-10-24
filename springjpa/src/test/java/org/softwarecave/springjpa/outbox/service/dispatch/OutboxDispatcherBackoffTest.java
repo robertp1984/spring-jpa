@@ -1,19 +1,18 @@
 package org.softwarecave.springjpa.outbox.service.dispatch;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.outbox.model.AggregateType;
 import org.softwarecave.springjpa.outbox.model.MessageType;
 import org.softwarecave.springjpa.outbox.model.Outbox;
 import org.softwarecave.springjpa.outbox.model.Status;
 import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OutboxDispatcherBackoffTest {
 
@@ -41,7 +40,8 @@ class OutboxDispatcherBackoffTest {
 
         assertThat(outbox.getStatus()).isEqualTo(Status.NEW);
         assertThat(outbox.getAttemptCount()).isEqualTo(1);
-        assertThat(outbox.getNextAttemptAt()).isBetween(before.plusMillis(500), Instant.now().plusMillis(1000));
+        assertThat(outbox.getNextAttemptAt())
+                .isBetween(before.plusMillis(500), Instant.now().plusMillis(1000));
     }
 
     @Test
@@ -74,7 +74,17 @@ class OutboxDispatcherBackoffTest {
 
     private static Outbox newOutbox(int attemptCount) {
         Instant now = Instant.now().minus(Duration.ofMinutes(1));
-        return new Outbox(UUID.randomUUID(), "topic", MessageType.AVRO, AggregateType.ASSET_EVENT, "key",
-                new byte[0], null, now, Status.NEW, attemptCount, now);
+        return new Outbox(
+                UUID.randomUUID(),
+                "topic",
+                MessageType.AVRO,
+                AggregateType.ASSET_EVENT,
+                "key",
+                new byte[0],
+                null,
+                now,
+                Status.NEW,
+                attemptCount,
+                now);
     }
 }

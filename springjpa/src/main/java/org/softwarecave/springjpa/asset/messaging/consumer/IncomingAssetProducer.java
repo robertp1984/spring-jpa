@@ -1,5 +1,9 @@
 package org.softwarecave.springjpa.asset.messaging.consumer;
 
+import static org.softwarecave.springjpa.common.messaging.KafkaProperties.MESSAGE_ID;
+
+import java.nio.charset.StandardCharsets;
+import java.util.random.RandomGeneratorFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.softwarecave.common.avro.Asset;
@@ -12,12 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.util.random.RandomGeneratorFactory;
-
-import static org.softwarecave.springjpa.common.messaging.KafkaProperties.MESSAGE_ID;
-
-
 @Service
 @Slf4j
 public class IncomingAssetProducer {
@@ -29,10 +27,11 @@ public class IncomingAssetProducer {
     private final String nameFormat;
     private final String descriptionFormat;
 
-    public IncomingAssetProducer(KafkaTemplate<String, AssetEvent> kafkaTemplate,
-                                 @Value("${app.asset.incoming.topic-name}") String topicName,
-                                 @Value("${app.asset.incoming.name-format}") String nameFormat,
-                                 @Value("${app.asset.incoming.description-format}") String descriptionFormat) {
+    public IncomingAssetProducer(
+            KafkaTemplate<String, AssetEvent> kafkaTemplate,
+            @Value("${app.asset.incoming.topic-name}") String topicName,
+            @Value("${app.asset.incoming.name-format}") String nameFormat,
+            @Value("${app.asset.incoming.description-format}") String descriptionFormat) {
         this.kafkaTemplate = kafkaTemplate;
         this.topicName = topicName;
         this.nameFormat = nameFormat;
@@ -56,7 +55,8 @@ public class IncomingAssetProducer {
                 .setAction(AssetAction.ADD)
                 .build();
 
-        var producerRecord = new ProducerRecord<>(topicName, assetEvent.getAsset().getId().toString(), assetEvent);
+        var producerRecord =
+                new ProducerRecord<>(topicName, assetEvent.getAsset().getId().toString(), assetEvent);
         producerRecord.headers().add(MESSAGE_ID, UUIDGenerator.get().toString().getBytes(StandardCharsets.UTF_8));
 
         kafkaTemplate.send(producerRecord);

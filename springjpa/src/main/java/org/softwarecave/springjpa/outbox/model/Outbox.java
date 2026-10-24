@@ -10,14 +10,13 @@ import jakarta.persistence.Version;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "outbox")
@@ -78,10 +77,30 @@ public class Outbox {
     @Version
     private Long version;
 
-    public Outbox(UUID id, String topic, MessageType messageType,
-                  AggregateType aggregateType, String aggregateId,
-                  byte[] payloadBytes, String payloadString,
-                  Instant createdDate, Status status, int attemptCount, Instant nextAttemptAt) {
-        this(id, topic, messageType, aggregateType, aggregateId, payloadBytes, payloadString, createdDate, status, attemptCount, nextAttemptAt, null);
+    public Outbox(
+            UUID id,
+            String topic,
+            MessageType messageType,
+            AggregateType aggregateType,
+            String aggregateId,
+            byte[] payloadBytes,
+            String payloadString,
+            Instant createdDate,
+            Status status,
+            int attemptCount,
+            Instant nextAttemptAt) {
+        this(
+                id,
+                topic,
+                messageType,
+                aggregateType,
+                aggregateId,
+                payloadBytes,
+                payloadString,
+                createdDate,
+                status,
+                attemptCount,
+                nextAttemptAt,
+                null);
     }
 }

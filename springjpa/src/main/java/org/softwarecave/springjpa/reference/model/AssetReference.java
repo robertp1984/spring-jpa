@@ -5,12 +5,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.softwarecave.springjpa.asset.model.Asset;
-
-import java.util.UUID;
 
 @Entity
 @DiscriminatorValue("assetref")
@@ -28,5 +27,4 @@ public class AssetReference extends Reference {
         super(id, name, valueString);
         this.asset = asset;
     }
-
 }

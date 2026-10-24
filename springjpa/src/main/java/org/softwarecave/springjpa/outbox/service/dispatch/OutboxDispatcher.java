@@ -1,5 +1,14 @@
 package org.softwarecave.springjpa.outbox.service.dispatch;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.softwarecave.springjpa.outbox.model.MessageType;
 import org.softwarecave.springjpa.outbox.model.Outbox;
@@ -13,16 +22,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 @Service
 @Slf4j
 public class OutboxDispatcher {
@@ -33,10 +32,11 @@ public class OutboxDispatcher {
     private final long ackTimeoutMillis;
     private final int batchSize;
 
-    public OutboxDispatcher(OutboxRepository outboxRepository,
-                            OutboxDispatcherBackoff outboxDispatcherBackoff,
-                            @Value("${app.outbox.sender.ack-timeout}") long ackTimeoutMillis,
-                            @Value("${app.outbox.sender.batch-size}") int batchSize) {
+    public OutboxDispatcher(
+            OutboxRepository outboxRepository,
+            OutboxDispatcherBackoff outboxDispatcherBackoff,
+            @Value("${app.outbox.sender.ack-timeout}") long ackTimeoutMillis,
+            @Value("${app.outbox.sender.batch-size}") int batchSize) {
         this.outboxRepository = outboxRepository;
         this.outboxDispatcherBackoff = outboxDispatcherBackoff;
         this.dispatcherStrategies = new HashMap<>();
@@ -48,9 +48,11 @@ public class OutboxDispatcher {
     public void setDispatcherStrategies(List<OutboxDispatcherStrategy> dispatcherStrategies) {
 
         for (var dispatcherStrategy : dispatcherStrategies) {
-            var prevValue = this.dispatcherStrategies.putIfAbsent(dispatcherStrategy.getMessageType(), dispatcherStrategy);
+            var prevValue =
+                    this.dispatcherStrategies.putIfAbsent(dispatcherStrategy.getMessageType(), dispatcherStrategy);
             if (prevValue != null) {
-                throw new IllegalStateException("There are conflicting Outbox dispatchers strategies with the same message type");
+                throw new IllegalStateException(
+                        "There are conflicting Outbox dispatchers strategies with the same message type");
             }
         }
     }
@@ -58,7 +60,8 @@ public class OutboxDispatcher {
     @Scheduled(fixedDelayString = "${app.outbox.sender.delay}", timeUnit = TimeUnit.MILLISECONDS)
     @Transactional(value = "transactionManager")
     public void process() {
-        // Method findByStatusAndNextAttempt must use pessimistic locking to prevent multiple instance of this application
+        // Method findByStatusAndNextAttempt must use pessimistic locking to prevent multiple instance of this
+        // application
         // from processing the same rows at the same time which could result in sending the same message multiple times.
         var entryList = outboxRepository.findByStatusAndNextAttempt(Status.NEW, Instant.now(), batchSize);
         log.debug("Fetched {} entries from outbox to process", entryList.size());
@@ -81,7 +84,8 @@ public class OutboxDispatcher {
             } catch (InterruptedException e) {
                 interrupted = true;
                 log.error("Interrupted while waiting for Kafka ack for outbox entry with id={}", entry.getId(), e);
-                // Ignore the interrupt for now and keep processing as usual because we cannot leave the inconsistent state
+                // Ignore the interrupt for now and keep processing as usual because we cannot leave the inconsistent
+                // state
             } catch (ExecutionException e) {
                 log.error("Failed sending the message with id={} from outbox", entry.getId(), e);
                 outboxDispatcherBackoff.onFailure(entry, e.getCause());
@@ -103,8 +107,7 @@ public class OutboxDispatcher {
         // soon as the first one fails or times out. This lets us process each entry's own outcome afterwards
         // instead of aborting the whole batch on the first failure.
         var settlementFutures = futureList.stream()
-                .map(future -> future
-                        .orTimeout(ackTimeoutMillis, TimeUnit.MILLISECONDS)
+                .map(future -> future.orTimeout(ackTimeoutMillis, TimeUnit.MILLISECONDS)
                         .handle((result, ex) -> null))
                 .toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(settlementFutures).join();
@@ -129,11 +132,13 @@ public class OutboxDispatcher {
         if (dispatcherStrategy != null) {
             return dispatcherStrategy.send(outbox);
         } else {
-            log.error("Unrecognized message type {} for outbox with id={}. Outbox entry will be skipped.", messageType, outbox.getId());
-            InvalidOutboxDataException exception = new InvalidOutboxDataException("Unrecognized message type %s for outbox with id=%s."
-                    .formatted(messageType, outbox.getId()));
+            log.error(
+                    "Unrecognized message type {} for outbox with id={}. Outbox entry will be skipped.",
+                    messageType,
+                    outbox.getId());
+            InvalidOutboxDataException exception = new InvalidOutboxDataException(
+                    "Unrecognized message type %s for outbox with id=%s.".formatted(messageType, outbox.getId()));
             return CompletableFuture.failedFuture(exception);
         }
     }
-
 }

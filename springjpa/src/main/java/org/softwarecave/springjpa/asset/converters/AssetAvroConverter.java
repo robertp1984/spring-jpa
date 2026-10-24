@@ -1,15 +1,14 @@
 package org.softwarecave.springjpa.asset.converters;
 
 import io.micrometer.common.util.StringUtils;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import org.softwarecave.common.avro.AssetAction;
 import org.softwarecave.common.avro.AssetEvent;
 import org.softwarecave.springjpa.asset.messaging.consumer.IncomingAssetValidationException;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.reference.model.AssetReference;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Component
 public class AssetAvroConverter {
