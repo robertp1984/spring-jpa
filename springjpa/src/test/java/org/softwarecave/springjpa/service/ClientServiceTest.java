@@ -1,5 +1,8 @@
 package org.softwarecave.springjpa.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.model.Client;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("it")
@@ -29,8 +28,7 @@ class ClientServiceTest {
         clientService.addClient(new Client(null, "George", "Black"));
 
         List<Client> clients = clientService.getClients();
-        assertThat(clients)
-                .hasSize(4);
+        assertThat(clients).hasSize(4);
 
         assertThat(clients.get(0))
                 .isNotNull()

@@ -1,6 +1,7 @@
 package org.softwarecave.springjpa.outbox.tools;
 
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.BinaryEncoder;
@@ -11,9 +12,6 @@ import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecord;
 import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 @Slf4j
 public class AvroTools {

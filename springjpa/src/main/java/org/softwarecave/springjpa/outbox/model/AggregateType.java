@@ -13,5 +13,4 @@ public enum AggregateType {
     AggregateType(Class<? extends SpecificRecord> avroClass) {
         this.avroClass = avroClass;
     }
-
 }

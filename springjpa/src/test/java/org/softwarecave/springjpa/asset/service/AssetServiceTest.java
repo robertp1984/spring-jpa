@@ -1,5 +1,9 @@
 package org.softwarecave.springjpa.asset.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.asset.messaging.AssetKafkaPublisher;
 import org.softwarecave.springjpa.asset.model.Asset;
@@ -15,11 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @ActiveProfiles("it")
 @Transactional(value = "transactionManager")
@@ -30,7 +29,8 @@ class AssetServiceTest {
     private static final String INTERNAL = "Internal";
 
     private static final Pageable DEFAULT_PAGEABLE = PageRequest.of(0, 100);
-    private static final Pageable PAGEABLE_SORT_BY_NAME = PageRequest.of(0, 100, Sort.by("name").ascending());
+    private static final Pageable PAGEABLE_SORT_BY_NAME =
+            PageRequest.of(0, 100, Sort.by("name").ascending());
 
     @Autowired
     private AssetService assetService;
@@ -46,10 +46,7 @@ class AssetServiceTest {
         createSampleAssets();
 
         Page<Asset> page = assetService.findByNameOrDescriptionLike("H%", DEFAULT_PAGEABLE);
-        assertThat(page)
-                .extracting(Asset::getName)
-                .hasSize(2)
-                .containsExactlyInAnyOrder("HBO", "HTC");
+        assertThat(page).extracting(Asset::getName).hasSize(2).containsExactlyInAnyOrder("HBO", "HTC");
     }
 
     @Test
@@ -57,9 +54,7 @@ class AssetServiceTest {
         createSampleAssets();
 
         Optional<Asset> foundAsset = assetService.findByName("Disney");
-        assertThat(foundAsset.get())
-                .isNotNull()
-                .hasFieldOrPropertyWithValue("name", "Disney");
+        assertThat(foundAsset.get()).isNotNull().hasFieldOrPropertyWithValue("name", "Disney");
     }
 
     @Test
@@ -67,10 +62,7 @@ class AssetServiceTest {
         createSampleAssets();
         Page<Asset> page = assetService.findByAssetClassName(EXTERNAL, DEFAULT_PAGEABLE);
 
-        assertThat(page)
-                .hasSize(3)
-                .extracting(Asset::getName)
-                .containsExactlyInAnyOrder("Netflix", "HBO", "HTC");
+        assertThat(page).hasSize(3).extracting(Asset::getName).containsExactlyInAnyOrder("Netflix", "HBO", "HTC");
     }
 
     @Test
@@ -78,10 +70,7 @@ class AssetServiceTest {
         createSampleAssets();
         Page<Asset> page = assetService.findByAssetClassName(INTERNAL, DEFAULT_PAGEABLE);
 
-        assertThat(page)
-                .hasSize(2)
-                .extracting(Asset::getName)
-                .containsExactlyInAnyOrder("Disney", "CircleK");
+        assertThat(page).hasSize(2).extracting(Asset::getName).containsExactlyInAnyOrder("Disney", "CircleK");
     }
 
     @Test
@@ -115,9 +104,7 @@ class AssetServiceTest {
         Page<Asset> assets = assetService.findFiltered("HBO", null, DEFAULT_PAGEABLE);
 
         // then
-        assertThat(assets)
-                .hasSize(1)
-                .anyMatch(a -> "HBO".equals(a.getName()));
+        assertThat(assets).hasSize(1).anyMatch(a -> "HBO".equals(a.getName()));
     }
 
     @Test
@@ -129,8 +116,7 @@ class AssetServiceTest {
         Page<Asset> assets = assetService.findFiltered("notexisting", null, DEFAULT_PAGEABLE);
 
         // then
-        assertThat(assets)
-                .isEmpty();
+        assertThat(assets).isEmpty();
     }
 
     @Test
@@ -142,10 +128,7 @@ class AssetServiceTest {
         Page<Asset> assets = assetService.findFiltered(null, INTERNAL, DEFAULT_PAGEABLE);
 
         // then
-        assertThat(assets)
-                .hasSize(2)
-                .extracting(Asset::getName)
-                .containsExactly("Disney", "CircleK");
+        assertThat(assets).hasSize(2).extracting(Asset::getName).containsExactly("Disney", "CircleK");
     }
 
     private void createSampleAssets() {

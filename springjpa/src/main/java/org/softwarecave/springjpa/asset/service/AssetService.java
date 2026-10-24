@@ -2,6 +2,10 @@ package org.softwarecave.springjpa.asset.service;
 
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.softwarecave.springjpa.asset.messaging.AssetKafkaPublisher;
 import org.softwarecave.springjpa.asset.model.Asset;
@@ -14,11 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +52,8 @@ public class AssetService {
 
     public Asset findById(UUID id) {
         validateAssetId(id);
-        return assetRepository.findWithReferencesById(id)
+        return assetRepository
+                .findWithReferencesById(id)
                 .orElseThrow(() -> new NoSuchAssetException("Asset with id %s was not found".formatted(id)));
     }
 

@@ -1,10 +1,10 @@
 package org.softwarecave.springjpa.messaging;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import java.util.HashMap;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.softwarecave.common.avro.AssetEvent;
 import org.softwarecave.springjpa.messaging.consumer.NonRetryableException;
 import org.softwarecave.springjpa.messaging.consumer.RetryableException;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +19,6 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
-import java.util.HashMap;
-
 @Configuration
 public class KafkaConsumerConfig {
 
@@ -31,8 +29,7 @@ public class KafkaConsumerConfig {
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
             @Value("${spring.kafka.consumer.group-id}") String groupId,
             @Value("${spring.kafka.consumer.properties.schema.registry.url}") String schemaRegistryUrl,
-            @Value("${spring.kafka.consumer.properties.isolation.level}") String isolationLevel
-    ) {
+            @Value("${spring.kafka.consumer.properties.isolation.level}") String isolationLevel) {
         var config = new HashMap<String, Object>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class.getName());
@@ -49,14 +46,14 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, SpecificRecord> assetContainerFactory(ConsumerFactory<String, SpecificRecord> consumerFactory,
-                                                                                             KafkaTemplate<String, Object> kafkaTemplate) {
+    public ConcurrentKafkaListenerContainerFactory<String, SpecificRecord> assetContainerFactory(
+            ConsumerFactory<String, SpecificRecord> consumerFactory, KafkaTemplate<String, Object> kafkaTemplate) {
         var factory = new ConcurrentKafkaListenerContainerFactory<String, SpecificRecord>();
         factory.setConsumerFactory(consumerFactory);
 
         // default error handler sending unprocessable messages to DLT
-        var errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate),
-                new FixedBackOff(1000, 3));
+        var errorHandler =
+                new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(1000, 3));
         errorHandler.addRetryableExceptions(RetryableException.class);
         errorHandler.addNotRetryableExceptions(NonRetryableException.class);
         factory.setCommonErrorHandler(errorHandler);

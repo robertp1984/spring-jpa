@@ -1,12 +1,11 @@
 package org.softwarecave.springjpa.asset.service;
 
+import java.util.Optional;
 import org.softwarecave.springjpa.asset.model.AssetClass;
 import org.softwarecave.springjpa.common.UUIDGenerator;
 import org.softwarecave.springjpa.service.DataValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class AssetClassService {

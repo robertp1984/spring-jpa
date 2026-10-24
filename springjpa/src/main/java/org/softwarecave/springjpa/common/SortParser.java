@@ -1,19 +1,18 @@
 package org.softwarecave.springjpa.common;
 
-import org.springframework.data.domain.Sort;
-
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Sort;
 
 public final class SortParser {
-    private SortParser() {
-    }
+    private SortParser() {}
 
     public static Sort parse(List<String> sort, Set<String> allowedProperties) {
         if (sort == null || sort.isEmpty()) {
             return Sort.unsorted();
         }
-        return Sort.by(sort.stream().map(value -> parseOrder(value, allowedProperties)).toList());
+        return Sort.by(
+                sort.stream().map(value -> parseOrder(value, allowedProperties)).toList());
     }
 
     private static Sort.Order parseOrder(String value, Set<String> allowedProperties) {

@@ -1,5 +1,16 @@
 package org.softwarecave.springjpa.asset.web;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.softwarecave.springjpa.asset.model.Asset;
 import org.softwarecave.springjpa.asset.model.AssetClass;
@@ -17,18 +28,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AssetController.class)
 @Import({AssetMapperImpl.class, AssetClassMapperImpl.class, AssetPageMapperImpl.class})
@@ -79,7 +78,6 @@ class AssetControllerTest {
                         .with(AuthUtils.jwtAuth(Role.ASSET_READ.title()))
                         .queryParam("assetClassName", "Microsoft"))
                 .andExpect(status().isOk())
-
                 .andExpect(jsonPath("$.content[0].id").value(UUID_2.toString()))
                 .andExpect(jsonPath("$.content[0].name").value("Microsoft"))
                 .andExpect(jsonPath("$.content[0].description").value("Microsoft bonds"))
@@ -89,7 +87,8 @@ class AssetControllerTest {
     }
 
     private static List<Asset> createAssets(List<AssetClass> assetClasses) {
-        return List.of(new Asset(UUID_1, "Google", "Google shares", assetClasses.getFirst(), List.of()),
+        return List.of(
+                new Asset(UUID_1, "Google", "Google shares", assetClasses.getFirst(), List.of()),
                 new Asset(UUID_2, "Microsoft", "Microsoft bonds", assetClasses.getFirst(), List.of()));
     }
 

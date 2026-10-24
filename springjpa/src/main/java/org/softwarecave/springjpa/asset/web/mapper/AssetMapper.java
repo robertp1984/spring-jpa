@@ -10,7 +10,7 @@ public interface AssetMapper {
 
     org.softwarecave.springjpa.openapi.model.Asset toApiModel(Asset asset);
 
-    @Mapping(target = "id", ignore=true)
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "references", ignore = true)
     @Mapping(target = "assetClass", ignore = true)
     @Mapping(target = "version", ignore = true)

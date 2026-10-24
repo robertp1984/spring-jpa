@@ -20,16 +20,23 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry> getAuthorizationManagerRequestMatcherRegistryCustomizer() {
-        return auth -> auth
-                .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/actuator", "/actuator/**").hasAnyAuthority(Role.ACTUATOR_READ.title())
-                .requestMatchers("/actuator", "/actuator/**").hasAnyAuthority(Role.ACTUATOR_WRITE.title())
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/assets", "/api/v1/assets/**").hasAnyAuthority(Role.ASSET_READ.title())
-                .requestMatchers("/api/v1/assets", "/api/v1/assets/**").hasAnyAuthority(Role.ASSET_WRITE.title())
-                .requestMatchers(HttpMethod.GET, "/api/v1/assetClasses", "/api/v1/assetClasses/**").hasAnyAuthority(Role.ASSET_CLASS_READ.title())
-                .requestMatchers("/api/v1/assetClasses", "/api/v1/assetClasses/**").hasAnyAuthority(Role.ASSET_CLASS_WRITE.title())
-                .anyRequest().denyAll();
+    private Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>
+            getAuthorizationManagerRequestMatcherRegistryCustomizer() {
+        return auth -> auth.requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, "/actuator", "/actuator/**")
+                .hasAnyAuthority(Role.ACTUATOR_READ.title())
+                .requestMatchers("/actuator", "/actuator/**")
+                .hasAnyAuthority(Role.ACTUATOR_WRITE.title())
+                .requestMatchers(HttpMethod.GET, "/api/v1/assets", "/api/v1/assets/**")
+                .hasAnyAuthority(Role.ASSET_READ.title())
+                .requestMatchers("/api/v1/assets", "/api/v1/assets/**")
+                .hasAnyAuthority(Role.ASSET_WRITE.title())
+                .requestMatchers(HttpMethod.GET, "/api/v1/assetClasses", "/api/v1/assetClasses/**")
+                .hasAnyAuthority(Role.ASSET_CLASS_READ.title())
+                .requestMatchers("/api/v1/assetClasses", "/api/v1/assetClasses/**")
+                .hasAnyAuthority(Role.ASSET_CLASS_WRITE.title())
+                .anyRequest()
+                .denyAll();
     }
 }

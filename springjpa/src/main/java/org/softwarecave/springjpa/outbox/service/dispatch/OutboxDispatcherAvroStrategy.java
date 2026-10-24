@@ -1,5 +1,8 @@
 package org.softwarecave.springjpa.outbox.service.dispatch;
 
+import static org.softwarecave.springjpa.outbox.tools.AvroTools.fromBytes;
+
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecord;
@@ -10,10 +13,6 @@ import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.CompletableFuture;
-
-import static org.softwarecave.springjpa.outbox.tools.AvroTools.fromBytes;
 
 @RequiredArgsConstructor
 @Service
@@ -49,12 +48,14 @@ public class OutboxDispatcherAvroStrategy implements OutboxDispatcherStrategy {
         } catch (Exception e) {
             // Invalid data will never succeed, so it is reported as non-retryable
             log.error("Failed to deserialize message from outbox {}", outbox.getId(), e);
-            var exception = new InvalidOutboxDataException("Failed to deserialize message from outbox %s".formatted(outbox.getId()), e);
+            var exception = new InvalidOutboxDataException(
+                    "Failed to deserialize message from outbox %s".formatted(outbox.getId()), e);
             return CompletableFuture.failedFuture(exception);
         }
 
         try {
-            return kafkaTemplate.send(outbox.getTopic(), outbox.getAggregateId(), avroObject)
+            return kafkaTemplate
+                    .send(outbox.getTopic(), outbox.getAggregateId(), avroObject)
                     .thenApply(a -> a);
         } catch (Exception e) {
             // Synchronous send failures (e.g. metadata timeout) may be transient, so they are retryable

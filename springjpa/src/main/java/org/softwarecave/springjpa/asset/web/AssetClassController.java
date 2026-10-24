@@ -24,9 +24,10 @@ public class AssetClassController implements AssetClassesApi {
 
         var savedAssetClass = assetClassService.add(assetClass);
 
-        var uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
-                .buildAndExpand(savedAssetClass.getId()).toUri();
+        var uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(savedAssetClass.getId())
+                .toUri();
         return ResponseEntity.created(uri).build();
     }
 }
-

@@ -1,15 +1,13 @@
 package org.softwarecave.springjpa.outbox.service.dispatch;
 
+import java.time.Instant;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.extern.slf4j.Slf4j;
 import org.softwarecave.springjpa.outbox.model.Outbox;
 import org.softwarecave.springjpa.outbox.model.Status;
 import org.softwarecave.springjpa.outbox.service.InvalidOutboxDataException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.concurrent.ThreadLocalRandom;
-
 
 @Service
 @Slf4j
@@ -20,11 +18,15 @@ public class OutboxDispatcherBackoff {
     private final double backoffMultiplier;
     private final int maxAttempts;
 
-    public OutboxDispatcherBackoff(@Value("${app.outbox.sender.backoff-initial}") long backoffInitialMillis,
-                                   @Value("${app.outbox.sender.backoff-max}") long backoffMaxMillis,
-                                   @Value("${app.outbox.sender.backoff-multiplier}") double backoffMultiplier,
-                                   @Value("${app.outbox.sender.max-attempts}") int maxAttempts) {
-        if (backoffInitialMillis <= 0 || backoffMaxMillis < backoffInitialMillis || backoffMultiplier < 1.0 || maxAttempts < 1) {
+    public OutboxDispatcherBackoff(
+            @Value("${app.outbox.sender.backoff-initial}") long backoffInitialMillis,
+            @Value("${app.outbox.sender.backoff-max}") long backoffMaxMillis,
+            @Value("${app.outbox.sender.backoff-multiplier}") double backoffMultiplier,
+            @Value("${app.outbox.sender.max-attempts}") int maxAttempts) {
+        if (backoffInitialMillis <= 0
+                || backoffMaxMillis < backoffInitialMillis
+                || backoffMultiplier < 1.0
+                || maxAttempts < 1) {
             throw new IllegalArgumentException("Invalid outbox backoff configuration");
         }
         this.backoffInitialMillis = backoffInitialMillis;
@@ -41,13 +43,18 @@ public class OutboxDispatcherBackoff {
             log.error("Non-retryable failure of outbox id={}. Set the status to FAILED", outbox.getId());
             outbox.setStatus(Status.FAILED);
         } else if (newAttemptCount >= maxAttempts) {
-            log.error("Outbox id={} reached the maximum number of attempts {}. Set the status to FAILED",
-                    outbox.getId(), maxAttempts);
+            log.error(
+                    "Outbox id={} reached the maximum number of attempts {}. Set the status to FAILED",
+                    outbox.getId(),
+                    maxAttempts);
             outbox.setStatus(Status.FAILED);
         } else {
             long nextAttemptDelayMs = computeDelayMillis(newAttemptCount);
-            log.info("Attempt {} of outbox id={} failed. Next attempt in {} ms",
-                    newAttemptCount, outbox.getId(), nextAttemptDelayMs);
+            log.info(
+                    "Attempt {} of outbox id={} failed. Next attempt in {} ms",
+                    newAttemptCount,
+                    outbox.getId(),
+                    nextAttemptDelayMs);
             outbox.setNextAttemptAt(Instant.now().plusMillis(nextAttemptDelayMs));
         }
     }
